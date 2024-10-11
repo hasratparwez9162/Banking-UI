@@ -149,7 +149,171 @@
       </ag-grid-vue>
     </div>
 
-    <!-- Add similar sections for Cards and Loans if needed -->
+    <div v-if="activeTab === 'cards'" class="summary-card">
+      <div class="summary-header">Your Cards</div>
+      <div v-if="true">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Card Number</th>
+              <th>Card Holder</th>
+              <th>Card Type</th>
+              <th>Credit Limit (₹)</th>
+              <th>Available Limit (₹)</th>
+              <th>Expiry Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="card in cards" :key="card.id">
+              <td>{{ card.cardNumber }}</td>
+              <td>{{ card.cardHolderName }}</td>
+              <td>{{ card.cardType }}</td>
+              <td>{{ card.creditLimit }}</td>
+              <td>{{ card.availableLimit }}</td>
+              <td>{{ card.expiryDate }}</td>
+              <td :class="statusClass(card.status)">{{ card.status }}</td>
+              <td class="actions">
+                <button @click="blockCard(card.id)" class="block-button">
+                  Block</button
+                ><button @click="unblockCard(card.id)" class="unblock-button">
+                  UnBlock
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="apply-button" @click="openApplyCardDialog">
+          Apply for a new Card
+        </button>
+      </div>
+
+      <!-- If no cards, offer to apply for one -->
+      <div v-else>
+        <div class="no-data">
+          <p>You currently have no cards.</p>
+          <button class="apply-button" @click="openApplyCardDialog">
+            Apply for a Card
+          </button>
+        </div>
+      </div>
+    </div>
+    <div v-if="showApplyCardDialog" class="dialog-container">
+      <div class="dialog-card">
+        <div class="dialog-header">Issue Credit/Debit Cards</div>
+
+        <div class="dialog-body">
+          <form @submit.prevent="cardIssue">
+            <div class="form-group">
+              <label for="cardHolderName">Card Holder </label>
+              <input
+                id="cardHolderName"
+                v-model="cardApplicationForm.cardHolderName"
+                type="text"
+                disabled
+              />
+            </div>
+            <div class="form-group">
+              <label for="cardType">Card Type</label>
+              <select id="cardType" v-model="cardApplicationForm.cardType">
+                <option value="DEBIT">Debit Card</option>
+                <option value="CREDIT">Credit Card</option>
+              </select>
+            </div>
+          </form>
+        </div>
+
+        <div class="dialog-footer">
+          <button @click="cardIssue" class="btn-submit">Submit</button>
+          <button @click="closeApplyCardDialog" class="btn-cancel">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+    <div v-if="activeTab === 'loans'" class="summary-card">
+      <div class="summary-header">Your Loans</div>
+      <div v-if="loans.length > 0">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Loan Number</th>
+              <th>Loan Type</th>
+              <th>Amount (₹)</th>
+              <th>Outstanding Balance (₹)</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="loan in loans" :key="loan.loanNumber">
+              <td>{{ loan.loanNumber }}</td>
+              <td>{{ loan.loanType }}</td>
+              <td>₹{{ loan.amount }}</td>
+              <td>₹{{ loan.outstandingBalance }}</td>
+              <td :class="statusClass(loan.status)">{{ loan.status }}</td>
+              <td class="actions">
+                <button @click="payLoan(loan.loanNumber)" class="pay-button">
+                  Pay
+                </button>
+                <button
+                  @click="viewLoanDetails(loan.loanNumber)"
+                  class="details-button"
+                >
+                  View Details
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <button class="apply-button" @click="openApplyLoanDialog">
+          Apply for a New Loan
+        </button>
+      </div>
+      <div v-else>
+        <div class="no-data">
+          <p>You currently have no loans.</p>
+          <button class="apply-button" @click="openApplyLoanDialog">
+            Apply for a Loan
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- Apply Loan Dialog -->
+    <div v-if="showApplyLoanDialog" class="dialog-container">
+      <div class="dialog-card">
+        <div class="dialog-header">Apply for a Loan</div>
+        <div class="dialog-body">
+          <form @submit.prevent="applyLoan">
+            <div class="form-group">
+              <label for="loanType">Loan Type</label>
+              <select v-model="loanForm.type" id="loanType" required>
+                <option value="personal">Personal Loan</option>
+                <option value="home">Home Loan</option>
+                <option value="car">Car Loan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="loanAmount">Loan Amount (₹)</label>
+              <input
+                type="number"
+                id="loanAmount"
+                v-model="loanForm.amount"
+                min="1"
+                required
+              />
+            </div>
+          </form>
+        </div>
+        <div class="dialog-footer">
+          <button @click="submitLoanApplication" class="btn-submit">
+            Apply
+          </button>
+          <button @click="closeLoanDialog" class="btn-cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -199,21 +363,37 @@ export default {
         toAccount: "",
         amount: null,
       },
+      showApplyCardDialog: false,
+      cardApplicationForm: {
+        cardType: "",
+        cardHolderName: "",
+      },
+      showApplyLoanDialog: false,
+      loanForm: {
+        type: "",
+        amount: "",
+        tenureMonths: null,
+      },
     };
   },
   methods: {
-    ...mapActions(["fetchUserData", "fetchTransactions", "fetchAccounts"]), // Map Vuex actions
+    ...mapActions([
+      "fetchUserData",
+      "fetchTransactions",
+      "fetchAccounts",
+      "addCard",
+    ]), // Map Vuex actions
 
     changeTab(tab) {
       this.activeTab = tab;
       const token = this.$store.getters.token; // Get token from Vuex store
       const user = JSON.parse(localStorage.getItem("user"));
-      const userId = user.id;
+      const email = user.email;
 
       if (tab === "transactions" && this.user && this.accounts.length > 0) {
         const accountNumber = this.accounts[0].accountNumber;
         this.fetchTransactions({ token, accountNumber });
-        this.fetchAccounts({ token, userId });
+        this.fetchUserData({ token, email });
       }
     },
 
@@ -230,6 +410,49 @@ export default {
     timestampFormatter(params) {
       const date = new Date(params.value);
       return date.toLocaleString(); // Customize format as needed
+    },
+    statusClass(status) {
+      return status;
+    },
+    async blockCard(id) {
+      const token = this.$store.getters.token;
+      const user = JSON.parse(localStorage.getItem("user"));
+      const email = user.email;
+      const response = await fetch(`http://localhost:8080/cards/block/${id}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+      const responceData = await response.text();
+      this.fetchUserData({ token, email });
+      alert(responceData);
+    },
+    async unblockCard(id) {
+      console.log(id);
+      const token = this.$store.getters.token;
+      const user = JSON.parse(localStorage.getItem("user"));
+      const email = user.email;
+      const response = await fetch(
+        `http://localhost:8080/cards/unblock/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+      const responceData = await response.text();
+      this.fetchUserData({ token, email });
+      alert(responceData);
     },
     async submitWithdraw() {
       const token = this.$store.getters.token;
@@ -278,12 +501,53 @@ export default {
         alert(error.message); // Show the error in an alert
       }
     },
+    async cardIssue() {
+      const token = this.$store.getters.token;
+      const user = JSON.parse(localStorage.getItem("user"));
+      const email = user.email;
+      const RequestBody = {
+        cardHolderName: this.cardApplicationForm.cardHolderName,
+        cardType: this.cardApplicationForm.cardType,
+        userId: user.id,
+      };
+
+      try {
+        console.log(RequestBody);
+        const response = await fetch("http://localhost:8080/cards/issue", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(RequestBody),
+        });
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData);
+        }
+        //const card = await response.json();
+
+        this.fetchUserData({ token, email });
+        alert("Successfully issue the card !!");
+        this.showApplyCardDialog = false;
+      } catch (error) {
+        console.error("Error during transaction:", error);
+        alert(error.message);
+      }
+    },
     onWithdraw() {
       this.withdrawForm.fromAccount = this.accounts[0].accountNumber;
       this.showWithdrawDialog = true;
     },
     closeWithdrawDialog() {
       this.showWithdrawDialog = false;
+    },
+    openApplyCardDialog() {
+      this.cardApplicationForm.cardHolderName = this.accounts[0].userName;
+      this.showApplyCardDialog = true;
+    },
+    closeApplyCardDialog() {
+      this.showApplyCardDialog = false;
     },
   },
   computed: {
@@ -483,7 +747,7 @@ export default {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 60%;
   display: block;
-  height: 58%;
+
   margin: auto;
   max-width: 400px;
 }
@@ -510,7 +774,8 @@ export default {
   margin-bottom: 8px;
 }
 
-.form-group input {
+.form-group input,
+.form-group select {
   width: 80%;
   padding: 8px;
   border: 1px solid #ccc;
@@ -538,6 +803,101 @@ export default {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+.status-active {
+  color: green;
+  font-weight: bold;
+}
+.status-closed {
+  color: red;
+  font-weight: bold;
+}
+.no-data {
+  text-align: center;
+  color: #999;
+  margin-top: 20px;
+}
+.apply-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background-color 0.3s;
+}
+.apply-button:hover {
+  background-color: #218838;
+}
+/* Status Styles */
+.ACTIVE {
+  color: #28a745 !important;
+  font-weight: bold;
+}
+
+.BLOCKED {
+  color: #dc3545 !important;
+  font-weight: bold;
+}
+
+.EXPIRED {
+  color: #6c757d !important;
+  font-weight: bold;
+}
+
+.ACTIVE::before {
+  content: "✔️ ";
+}
+
+.BLOCKED::before {
+  content: "❌ ";
+}
+
+.EXPIRED::before {
+  content: "⚠️ ";
+}
+.actions button {
+  padding: 6px 12px;
+  margin: 0 5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+/* Block button styling */
+.actions .block-button {
+  background-color: red;
+  color: white;
+}
+
+.actions .block-button:hover {
+  background-color: darkred;
+}
+
+/* Unblock button styling */
+.actions .unblock-button {
+  background-color: green;
+  color: white;
+}
+
+.actions .unblock-button:hover {
+  background-color: darkgreen;
+}
+@media (max-width: 768px) {
+  .balance-card {
+    width: 176%;
+  }
+  .summary-card {
+    width: 183%;
+  }
+  .dialog-card {
+    width: 90%; /* Adjust width for smaller screens */
+  }
 }
 @media (max-width: 768px) {
   .balance-card {

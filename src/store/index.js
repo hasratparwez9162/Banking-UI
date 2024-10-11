@@ -23,8 +23,8 @@ const store = createStore({
     setLoans(state, loans) {
       state.loans = loans;
     },
-    setCards(state, cards) {
-      state.cards = cards;
+    setCards(state, card) {
+      state.cards = card;
     },
     setTransactions(state, transactions) {
       state.transactions = transactions;
@@ -38,11 +38,19 @@ const store = createStore({
     setLogin(state, isLogin) {
       state.isLogin = isLogin;
     },
+    addCard(state, card) {
+      console.log("add card mutation");
+
+      console.log(card);
+
+      state.cards.push(card);
+      console.log(state.cards);
+      localStorage.setItem("cards", JSON.stringify(state.cards));
+    },
   },
   actions: {
     fetchUserData({ commit }, { token, email }) {
-      console.log(token);
-      console.log(email);
+      console.log("Fetching user data");
 
       return fetch(`http://127.0.0.1:8080/users/${email}`, {
         headers: {
@@ -57,7 +65,7 @@ const store = createStore({
             email: data.email,
             phoneNumber: data.phoneNumber,
           });
-          console.log(data.id);
+
           commit("setAccounts", data.accounts);
           commit("setLoans", data.loans);
           commit("setCards", data.cards);
@@ -117,6 +125,11 @@ const store = createStore({
         .catch((error) => {
           console.error("Error fetching accounts:", error);
         });
+    },
+    addCard({ commit }, card) {
+      console.log("Add card in action");
+
+      commit("addCard", card);
     },
 
     setToken({ commit }, token) {
