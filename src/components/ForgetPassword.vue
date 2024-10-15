@@ -7,7 +7,7 @@
         Please enter your username below, and we will send you a link to reset
         your password.
       </p>
-      <input type="text" v-model="username" placeholder="Username" />
+      <input type="text" v-model="username" placeholder="Username/Email" />
       <button @click="sendResetLink">Send Reset Link</button>
       <div class="login-section">
         <p>Remembered your password? <a href="/login">Login Here</a></p>
