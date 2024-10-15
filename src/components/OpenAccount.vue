@@ -401,6 +401,9 @@ export default {
       return re.test(String(email).toLowerCase());
     },
     async submitForm() {
+      if (this.validateTerms) {
+        return;
+      }
       const payload = {
         firstName: this.formData.firstName,
         lastName: this.formData.lastName,
