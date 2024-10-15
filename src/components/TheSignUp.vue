@@ -8,7 +8,13 @@
       <!-- <p style="text-align: center">OR</p> -->
 
       <input type="text" v-model="username" placeholder="UserName" />
-      <input type="text" v-model="firstname" placeholder="FirstName" />
+      <input
+        type="text"
+        v-model="firstname"
+        placeholder="FirstName"
+        @blur="validateFirstName"
+      />
+      <span class="error">{{ errors.firstName || "" }}</span>
       <input type="text" v-model="lastname" placeholder="LastName" />
       <input type="text" v-model="accountNumber" placeholder="AccountNumber" />
       <input type="email" v-model="email" placeholder="Email" />
@@ -32,9 +38,25 @@ export default {
       email: "",
       password: "",
       accountNumber: "",
+      errors: {},
     };
   },
   methods: {
+    validateFirstName() {
+      const value = this.firstname;
+      const namePattern = /^[A-Za-z]+$/;
+      if (!value) {
+        this.errors.firstName = "First name is required.";
+      } else if (value.length < 2 || value.length > 30) {
+        this.errors.firstName =
+          "First name must be between 2 and 30 characters.";
+      } else if (!namePattern.test(value)) {
+        this.errors.firstName =
+          "First name must contain only alphabetic characters.";
+      } else {
+        this.errors.firstName = null; // Clear error
+      }
+    },
     signup() {
       const signUpData = {
         username: this.username,
@@ -54,9 +76,9 @@ export default {
       })
         .then((response) => {
           if (!response.ok) {
-            return response.json().then((err) => {
+            return response.text().then((err) => {
               // Get error details
-              throw new Error("Error: " + err.message);
+              throw new Error("Error: " + err);
             });
           }
           return response;
@@ -156,6 +178,14 @@ export default {
 .login-section button :hover {
   text-decoration: none; /* Underline on hover */
   background: transparent;
+}
+.error {
+  min-height: 12px;
+  color: red;
+  font-size: 12px;
+
+  display: flex;
+  max-height: 12px;
 }
 @media (max-width: 768px) {
   .login-form {

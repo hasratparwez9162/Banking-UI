@@ -362,7 +362,7 @@ export default {
     },
 
     validateState(value) {
-      const statePattern = /^[A-Za-z]+$/;
+      const statePattern = /^[A-Za-z ]+$/;
       if (!value) {
         this.errors.stateClass = "form-select-invalid";
         this.errors.state = "State is required.";
@@ -401,24 +401,6 @@ export default {
       return re.test(String(email).toLowerCase());
     },
     async submitForm() {
-      // Validate all fields before submitting
-      this.validateFirstName();
-      this.validateLastName();
-      this.validateEmail();
-      this.validateGender();
-      this.validatePhoneNumber();
-      this.validateAlternatePhoneNumber();
-      this.validateAccountType();
-      this.validateAddress();
-      this.validateState();
-      this.validateZip();
-      this.validateTerms();
-
-      // Check if there are any errors
-      if (Object.values(this.errors).some((error) => error)) {
-        return; // Don't submit if there are errors
-      }
-
       const payload = {
         firstName: this.formData.firstName,
         lastName: this.formData.lastName,
@@ -457,6 +439,7 @@ export default {
         const result = await response.json();
         this.displayAccountDetails(result);
       } catch (error) {
+        alert(error);
         console.error("Error opening account:", error);
       }
     },
