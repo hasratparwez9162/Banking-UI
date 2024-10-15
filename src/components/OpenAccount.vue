@@ -6,112 +6,182 @@
       opening the account.
     </p>
     <form @submit.prevent="submitForm">
-      <label for="firstName">First Name*</label>
-      <input type="text" id="firstName" v-model="formData.firstName" />
-      <span v-if="errors.firstName" class="error">{{ errors.firstName }}</span>
-
-      <label for="lastName">Last Name*</label>
-      <input type="text" id="lastName" v-model="formData.lastName" />
-      <span v-if="errors.lastName" class="error">{{ errors.lastName }}</span>
-
-      <label for="email">Email*</label>
-      <input type="email" id="email" v-model="formData.email" />
-      <span v-if="errors.email" class="error">{{ errors.email }}</span>
-
-      <label for="gender">Gender*</label>
-      <select id="gender" v-model="formData.gender">
-        <option value="Male">Male</option>
-        <option value="Female">Female</option>
-        <option value="Other">Other</option>
-      </select>
-      <span v-if="errors.gender" class="error">{{ errors.gender }}</span>
-
-      <label for="phoneNumber">Phone Number*</label>
-      <input type="number" id="phoneNumber" v-model="formData.phoneNumber" />
-      <span v-if="errors.phoneNumber" class="error">{{
-        errors.phoneNumber
-      }}</span>
-
-      <label for="alternatePhoneNumber">Alternate Phone Number</label>
-      <input
-        type="number"
-        id="alternatePhoneNumber"
-        v-model="formData.alternatePhoneNumber"
-      />
-      <label for="accountType">Account Type*</label>
-      <select id="accountType" v-model="formData.accountType">
-        <option value="SAVING">Saving</option>
-        <option value="CURRENT">Current</option>
-      </select>
-      <span v-if="errors.accountType" class="error">{{
-        errors.accountType
-      }}</span>
-
-      <label for="address">Address*</label>
-      <input type="text" id="address" v-model="formData.address" />
-      <span v-if="errors.address" class="error">{{ errors.address }}</span>
-
-      <label for="state">State*</label>
-      <input type="text" id="state" v-model="formData.state" />
-      <span v-if="errors.state" class="error">{{ errors.state }}</span>
-      <label for="zip">zip*</label>
-      <input type="text" id="zip" v-model="formData.zip" />
-      <span v-if="errors.zip" class="error">{{ errors.zip }}</span>
-      <div class="checkbox">
-        <div>
-          <input type="checkbox" id="terms" v-model="formData.terms" />
+      <div class="twoFieldContainer">
+        <div class="twoFieldContent">
+          <label for="firstName">First Name*</label>
+          <input
+            :class="errors.firstNameClass"
+            type="text"
+            id="firstName"
+            v-model.trim="formData.firstName"
+          />
+          <span class="error">{{ errors.firstName || "" }}</span>
         </div>
-        <div>
-          <label for="terms">
-            I agree to the Terms and Conditions and authorize HP bank to send
-            mail.
-          </label>
+        <div class="twoFieldContent">
+          <label for="lastName">Last Name*</label>
+          <input
+            :class="errors.lastNameClass"
+            type="text"
+            id="lastName"
+            v-model.trim="formData.lastName"
+          />
+          <span class="error">{{ errors.lastName || "" }}</span>
         </div>
       </div>
-      <span v-if="errors.terms" class="error">{{ errors.terms }}</span>
+      <div class="twoFieldContainer">
+        <div class="twoFieldContent">
+          <label for="email">Email*</label>
+          <input
+            :class="errors.emailClass"
+            type="email"
+            id="email"
+            v-model.trim="formData.email"
+          />
+          <span class="error">{{ errors.email || "" }}</span>
+        </div>
+        <div class="twoFieldContent">
+          <label for="gender">Gender*</label>
+          <select
+            id="gender"
+            :class="errors.genderClass"
+            v-model="formData.gender"
+          >
+            <option disabled value="">Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+          <span class="error">{{ errors.gender || "" }}</span>
+        </div>
+      </div>
+      <div class="twoFieldContainer">
+        <div class="twoFieldContent">
+          <label for="phoneNumber">Phone Number*</label>
+          <input
+            :class="errors.phoneNumberClass"
+            type="tel"
+            id="phoneNumber"
+            v-model.trim="formData.phoneNumber"
+          />
+          <span class="error">{{ errors.phoneNumber || "" }}</span>
+        </div>
+        <div class="twoFieldContent">
+          <label for="alternatePhoneNumber">Alternate Phone Number</label>
+          <input
+            :class="errors.alternatePhoneNumberClass"
+            type="tel"
+            id="alternatePhoneNumber"
+            v-model.trim="formData.alternatePhoneNumber"
+          />
+          <span class="error">{{ errors.alternatePhoneNumber || "" }}</span>
+        </div>
+      </div>
+      <div class="twoFieldContainer">
+        <div class="twoFieldContent">
+          <label for="address">Address*</label>
+          <input
+            :class="errors.addressClass"
+            type="text"
+            id="address"
+            v-model.trim="formData.address"
+          />
+          <span class="error">{{ errors.address || "" }}</span>
+        </div>
+        <div class="twoFieldContent">
+          <label for="state">State*</label>
+          <select
+            :class="errors.stateClass"
+            id="state"
+            v-model.trim="formData.state"
+          >
+            <option disabled value="">Select State</option>
+            <option
+              v-for="state in states"
+              :key="state.iso2"
+              :value="state.name"
+            >
+              {{ state.name }}
+            </option>
+          </select>
+          <span class="error">{{ errors.state || "" }}</span>
+        </div>
+      </div>
+      <div class="twoFieldContainer">
+        <div class="twoFieldContent">
+          <label for="zip">Zip*</label>
+          <input
+            :class="errors.zipClass"
+            type="text"
+            id="zip"
+            v-model.trim="formData.zip"
+          />
+          <span class="error">{{ errors.zip || "" }}</span>
+        </div>
+        <div class="twoFieldContent">
+          <label for="accountType">Account Type*</label>
+          <select
+            :class="errors.accountTypeClass"
+            id="accountType"
+            v-model.trim="formData.accountType"
+          >
+            <option disabled value="">Select Account Type</option>
+            <option value="SAVING">Saving</option>
+            <option value="CURRENT">Current</option>
+          </select>
+          <span class="error">{{ errors.accountType || "" }}</span>
+        </div>
+      </div>
+
+      <div class="checkbox">
+        <input type="checkbox" id="terms" v-model="formData.terms" />
+        <label for="terms">
+          I agree to the Terms and Conditions and authorize HP Bank to send
+          mail.
+        </label>
+      </div>
+      <span v-if="errors.terms" class="errorterm">{{ errors.terms }}</span>
 
       <button type="submit" class="submit-btn">Submit Form</button>
     </form>
+
+    <div v-if="dialog" max-width="500" class="dialog-container">
+      <div class="dialog-card">
+        <div class="headline dialog-header">Congratulations !!</div>
+        <div v-if="accountDetails" class="dialog-body">
+          <p>Account opened successfully! Here are your details:</p>
+          <p>
+            <strong>Name:</strong> {{ accountDetails.firstName }}
+            {{ accountDetails.lastName }}
+          </p>
+          <p><strong>Email:</strong> {{ accountDetails.email }}</p>
+          <p><strong>Phone Number:</strong> {{ accountDetails.phoneNumber }}</p>
+          <p>
+            <strong>Address:</strong> {{ accountDetails.address }},
+            {{ accountDetails.state }} {{ accountDetails.zip }}
+          </p>
+          <p>
+            <strong>Account Number:</strong>
+            {{ accountDetails.accounts[0].accountNumber }}
+          </p>
+          <p>
+            <strong>Balance:</strong> ₹{{ accountDetails.accounts[0].balance }}
+          </p>
+          <p>
+            <strong>Date Opened:</strong>
+            {{ accountDetails.accounts[0].dateOpened }}
+          </p>
+          <p class="note">
+            <strong>Note:</strong> Please save these details for your Net
+            Banking registration.
+          </p>
+        </div>
+        <div class="dialog-footer">
+          <div></div>
+          <button class="custom-button" @click="closeDialog">OK</button>
+        </div>
+      </div>
+    </div>
   </div>
-  <v-dialog v-if="dialog" max-width="500" class="dialog-container">
-    <v-card class="dialog-card">
-      <v-card-title class="headline dialog-header"
-        >Congratulations !!</v-card-title
-      >
-      <v-card-text v-if="accountDetails" class="dialog-body">
-        <p>Account opened successfully! Here are your details:</p>
-        <p>
-          <strong>Name:</strong> {{ accountDetails.firstName }}
-          {{ accountDetails.lastName }}
-        </p>
-        <p><strong>Email:</strong> {{ accountDetails.email }}</p>
-        <p><strong>Phone Number:</strong> {{ accountDetails.phoneNumber }}</p>
-        <p>
-          <strong>Address:</strong> {{ accountDetails.address }},
-          {{ accountDetails.state }} {{ accountDetails.zip }}
-        </p>
-        <p>
-          <strong>Account Number:</strong>
-          {{ accountDetails.accounts[0].accountNumber }}
-        </p>
-        <p>
-          <strong>Balance:</strong> ₹{{ accountDetails.accounts[0].balance }}
-        </p>
-        <p>
-          <strong>Date Opened:</strong>
-          {{ accountDetails.accounts[0].dateOpened }}
-        </p>
-        <p class="note">
-          <strong>Note:</strong> Please save these details for your Net Banking
-          registration.
-        </p>
-      </v-card-text>
-      <v-card-actions class="dialog-footer">
-        <v-spacer></v-spacer>
-        <v-btn class="custom-button" @click="closeDialog">OK</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>
 
 <script>
@@ -131,64 +201,222 @@ export default {
         accountType: "",
         terms: false,
       },
-      errors: {},
+      states: [],
+
+      errors: {
+        firstNameClass: "form-control",
+        lastNameClass: "form-control",
+        emailClass: "form-control",
+        phoneNumberClass: "form-control",
+        alternatePhoneNumberClass: "form-control",
+        addressClass: "form-control",
+        stateClass: "form-control",
+        zipClass: "form-control",
+        genderClass: "form-control",
+        accountTypeClass: "form-control",
+      },
       errorMessage: null,
       dialog: false,
       accountDetails: null,
     };
   },
+  watch: {
+    "formData.accountType"(newVal) {
+      this.validateAccountType(newVal);
+    },
+    "formData.gender"(newVal) {
+      this.validateGender(newVal);
+    },
+    "formData.address"(newVal) {
+      this.validateAddress(newVal);
+    },
+    "formData.firstName"(newVal) {
+      this.validateFirstName(newVal);
+    },
+    "formData.lastName"(newVal) {
+      this.validateLastName(newVal);
+    },
+    "formData.email"(newVal) {
+      this.validateEmail(newVal);
+    },
+    "formData.phoneNumber"(newVal) {
+      this.validatePhoneNumber(newVal);
+    },
+    "formData.alternatePhoneNumber"(newVal) {
+      this.validateAlternatePhoneNumber(newVal);
+    },
+    "formData.zip"(newVal) {
+      this.validateZip(newVal);
+    },
+    "formData.state"(newVal) {
+      this.validateState(newVal);
+    },
+  },
   methods: {
-    validateForm() {
-      this.errors = {}; // Reset errors
-
-      // Check required fields
-      if (!this.formData.firstName) {
+    validateFirstName(value) {
+      const namePattern = /^[A-Za-z]+$/;
+      if (!value) {
+        this.errors.firstNameClass = "form-select-invalid";
         this.errors.firstName = "First name is required.";
+      } else if (value.length < 2 || value.length > 30) {
+        this.errors.firstNameClass = "form-select-invalid";
+        this.errors.firstName =
+          "First name must be between 2 and 30 characters.";
+      } else if (!namePattern.test(value)) {
+        this.errors.firstNameClass = "form-select-invalid";
+        this.errors.firstName =
+          "First name must contain only alphabetic characters.";
+      } else {
+        this.errors.firstNameClass = "form-select-valid";
+        this.errors.firstName = null; // Clear error
       }
-      if (!this.formData.lastName) {
+    },
+    validateLastName(value) {
+      const namePattern = /^[A-Za-z]+$/;
+      if (!value) {
+        this.errors.lastNameClass = "form-select-invalid";
         this.errors.lastName = "Last name is required.";
+      } else if (value.length < 2 || value.length > 30) {
+        this.errors.lastNameClass = "form-select-invalid";
+        this.errors.lastName = "Last name must be between 2 and 30 characters.";
+      } else if (!namePattern.test(value)) {
+        this.errors.lastNameClass = "form-select-invalid";
+        this.errors.lastName =
+          "Last name must contain only alphabetic characters.";
+      } else {
+        this.errors.lastNameClass = "form-select-valid";
+        this.errors.lastName = null; // Clear error
       }
-      if (!this.formData.email) {
+    },
+    validateEmail(value) {
+      if (!value) {
+        this.errors.emailClass = "form-select-invalid";
         this.errors.email = "Email is required.";
-      } else if (!this.validEmail(this.formData.email)) {
+      } else if (!this.validEmail(value)) {
+        this.errors.emailClass = "form-select-invalid";
         this.errors.email = "Please enter a valid email address.";
+      } else {
+        this.errors.emailClass = "form-select-valid";
+        this.errors.email = null; // Clear error
       }
-      if (!this.formData.gender) {
+    },
+    validateGender(value) {
+      if (!value) {
+        this.errors.genderClass = "form-select-invalid";
         this.errors.gender = "Gender is required.";
+      } else {
+        this.errors.genderClass = "form-select-valid";
+        this.errors.gender = null; // Clear error
       }
-      if (!this.formData.accountType) {
-        this.errors.accountType = "Account Type is required.";
-      }
-      if (!this.formData.phoneNumber) {
+    },
+    validatePhoneNumber(value) {
+      if (!value) {
+        this.errors.phoneNumberClass = "form-select-invalid";
         this.errors.phoneNumber = "Phone number is required.";
+      } else if (!/^\d{10}$/.test(value)) {
+        this.errors.phoneNumberClass = "form-select-invalid";
+        this.errors.phoneNumber = "Phone number must be exactly 10 digits.";
+      } else {
+        this.errors.phoneNumberClass = "form-select-valid";
+        this.errors.phoneNumber = null; // Clear error
       }
-      if (!this.formData.address) {
+    },
+    validateAlternatePhoneNumber(value) {
+      if (!value) {
+        this.errors.alternatePhoneNumber = "";
+      } else if (!/^\d{10}$/.test(value)) {
+        this.errors.alternatePhoneNumberClass = "form-select-invalid";
+        this.errors.alternatePhoneNumber =
+          "Alternate Phone number must be exactly 10 digits.";
+      } else if (value == this.formData.phoneNumber) {
+        this.errors.alternatePhoneNumberClass = "form-select-invalid";
+        this.errors.alternatePhoneNumber =
+          "Alternate Number Should be diffrent from Phone number";
+      } else {
+        this.errors.alternatePhoneNumberClass = "form-select-valid";
+        this.errors.alternatePhoneNumber = null; // Clear error
+      }
+    },
+    validateAccountType(value) {
+      if (!value) {
+        this.errors.accountTypeClass = "form-select-invalid";
+        this.errors.accountType = "Account Type is required.";
+      } else {
+        this.errors.accountType = null; // Clear error
+        this.errors.accountTypeClass = "form-select-valid";
+      }
+    },
+    validateAddress(value) {
+      const addressPattern = /^[a-zA-Z0-9#][a-zA-Z0-9\s,.-]*$/;
+      if (!value) {
+        this.errors.addressClass = "form-select-invalid";
         this.errors.address = "Address is required.";
+      } else if (!addressPattern.test(value)) {
+        this.errors.addressClass = "form-select-invalid";
+        this.errors.address =
+          "Address contains invalid characters. Only letters, numbers, spaces, commas, periods, and hyphens are allowed.";
+      } else {
+        this.errors.addressClass = "form-select-valid";
+        this.errors.address = null; // Clear error
       }
-      if (!this.formData.state) {
+    },
+
+    validateState(value) {
+      const statePattern = /^[A-Za-z]+$/;
+      if (!value) {
+        this.errors.stateClass = "form-select-invalid";
         this.errors.state = "State is required.";
+      } else if (!statePattern.test(value)) {
+        this.errors.stateClass = "form-select-invalid";
+        this.errors.state = "State must contain only alphabetic characters.";
+      } else if (value.length < 2 || value.length > 50) {
+        this.errors.stateClass = "form-select-invalid";
+        this.errors.state = "State must be between 2 and 50 characters.";
+      } else {
+        this.errors.stateClass = "form-select-valid";
+        this.errors.state = null; // Clear error
       }
-      if (!this.formData.zip) {
-        this.errors.zip = "zip is required.";
+    },
+    validateZip(value) {
+      if (!value) {
+        this.errors.zipClass = "form-select-invalid";
+        this.errors.zip = "Zip code is required.";
+      } else if (!/^\d{6}$/.test(value)) {
+        this.errors.zipClass = "form-select-invalid";
+        this.errors.zip = "Please enter a valid 6-digit zip code.";
+      } else {
+        this.errors.zipClass = "form-select-valid";
+        this.errors.zip = null; // Clear error
       }
+    },
+    validateTerms() {
       if (!this.formData.terms) {
         this.errors.terms = "You must agree to the Terms and Conditions.";
+      } else {
+        this.errors.terms = null; // Clear error
       }
-
-      // Return true if there are no errors
-      return Object.keys(this.errors).length === 0;
     },
     validEmail(email) {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(email);
+      return re.test(String(email).toLowerCase());
     },
     async submitForm() {
-      // Validate the form first
-      if (!this.validateForm()) {
-        // If validation fails, scroll to the top to show errors
+      // Validate all fields before submitting
+      this.validateFirstName();
+      this.validateLastName();
+      this.validateEmail();
+      this.validateGender();
+      this.validatePhoneNumber();
+      this.validateAlternatePhoneNumber();
+      this.validateAccountType();
+      this.validateAddress();
+      this.validateState();
+      this.validateZip();
+      this.validateTerms();
 
-        window.scrollTo(0, 0);
-        return;
+      // Check if there are any errors
+      if (Object.values(this.errors).some((error) => error)) {
+        return; // Don't submit if there are errors
       }
 
       const payload = {
@@ -205,6 +433,7 @@ export default {
       };
 
       try {
+        console.log(payload);
         let url = "http://localhost:8080/users/open-account";
         const response = await fetch(url, {
           method: "POST",
@@ -215,9 +444,11 @@ export default {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+          const errorMessage = await response.json();
+          console.log(errorMessage);
+          throw new Error(`HTTP error! status: ${errorMessage}`);
         } else if (response.status == 226) {
-          const errorResponce = await response.text();
+          const errorResponce = await response.json();
           this.errorMessage = errorResponce;
           alert(`Warning: ${errorResponce}`);
           throw new Error(errorResponce);
@@ -254,6 +485,28 @@ export default {
       this.dialog = false; // Close the dialog
       this.$router.push("/"); // Redirect to the home page after closing
     },
+    fetchStates() {
+      const payload = {
+        country: "India",
+      };
+
+      fetch("https://countriesnow.space/api/v0.1/countries/states", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          this.states = result.data.states;
+          console.log(result.data.states); // Populate the states array with the fetched data
+        })
+        .catch((error) => console.log("Error fetching states:", error));
+    },
+  },
+  mounted() {
+    this.fetchStates();
   },
 };
 </script>
@@ -283,21 +536,23 @@ label {
 }
 input[type="text"],
 input[type="email"],
-input[type="number"],
+input[type="tel"],
 select {
   width: 100%;
   padding: 10px;
   margin-top: 5px;
-  border: none;
+  border-radius: 6px;
   box-sizing: border-box;
-  border-bottom: 2px solid #bfc3be;
+  border: 2px solid #bfc3be;
   outline: none;
+  color: #666;
 }
 input[type="checkbox"] {
   margin-top: 20px;
 }
 option {
-  text-align: center;
+  text-align: left;
+  color: #666;
 }
 .checkbox {
   display: flex;
@@ -319,9 +574,20 @@ option {
   background-color: #ff3333;
 }
 .error {
+  min-height: 12px;
   color: red;
   font-size: 12px;
   margin-top: 5px;
+  display: flex;
+  text-align: left;
+}
+.errorterm {
+  min-height: 12px;
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+
+  max-height: 12px;
 }
 .dialog-container {
   position: relative;
@@ -391,6 +657,32 @@ option {
   font-size: 14px;
   color: #856404;
   border-radius: 4px;
+}
+.twoFieldContainer {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.twoFieldContainer label {
+  text-align: left;
+}
+.twoFieldContent {
+  width: 40%;
+}
+.form-control:focus {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+.form-select-invalid:focus {
+  border-color: red;
+  box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25);
+}
+.form-select-valid:focus {
+  border-color: #198754;
+  box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25);
 }
 
 @media (max-width: 600px) {
