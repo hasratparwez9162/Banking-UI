@@ -3,7 +3,7 @@
     <div class="login-form">
       <img src="@/assets/logo.png" alt="Logo" class="logo" />
       <h2>Login to Your Account</h2>
-      <input type="email" v-model="email" placeholder="Email/Username" />
+      <input type="email" v-model="email" placeholder="Email" />
       <input type="password" v-model="password" placeholder="Password" />
       <a href="/forgetpassword" class="forgot-password">Forgot Password?</a>
       <button @click="login">Sign In</button>
@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import CryptoJS from "crypto-js";
 export default {
   data() {
     return {
@@ -26,9 +27,19 @@ export default {
   },
   methods: {
     login() {
+      const secretKey = CryptoJS.enc.Base64.parse(
+        "E7P/iFOV3eLtlcpPQQVu5T0LVmm0Sxl2GJwHbNN9Eqg="
+      );
+      const iv = CryptoJS.enc.Utf8.parse("1234567890123456");
+      // Encrypt the password using AES-CBC with PKCS5 padding (default in CryptoJS)
+      const encryptedPassword = CryptoJS.AES.encrypt(this.password, secretKey, {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      }).toString(); // Convert to Base64 string
       const loginData = {
-        username: this.email, // Assuming the email field is used for username
-        password: this.password,
+        username: this.email,
+        password: encryptedPassword,
       };
 
       fetch("http://localhost:8080/apigateway/login", {
@@ -51,7 +62,9 @@ export default {
           const isLogin = true;
           const token = data.access_token;
           const email = this.email;
-
+          if (email == "hpbanking581@gmail.com") {
+            this.$store.dispatch("setIsAdmin", true);
+          }
           localStorage.setItem("token", token);
           localStorage.setItem("email", email);
           this.$store.dispatch("setToken", token);
@@ -178,6 +191,7 @@ export default {
   .login-form {
     width: 90%;
     padding: 20px;
+    max-height: 100%;
   }
 }
 </style>
