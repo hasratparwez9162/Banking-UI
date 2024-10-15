@@ -12,6 +12,7 @@ const store = createStore({
     token: localStorage.getItem("token") || "",
     email: localStorage.getItem("email") || "",
     isLogin: localStorage.getItem("isLogin") || "",
+    isAdmin: localStorage.getItem("isAdmin") || "",
   },
   mutations: {
     setUser(state, user) {
@@ -37,6 +38,9 @@ const store = createStore({
     },
     setLogin(state, isLogin) {
       state.isLogin = isLogin;
+    },
+    setIsAdmin(state, isAdmin) {
+      state.isAdmin = isAdmin;
     },
     addCard(state, card) {
       console.log("add card mutation");
@@ -140,6 +144,10 @@ const store = createStore({
       commit("setEmail", email);
       localStorage.setItem("email", email);
     },
+    setIsAdmin({ commit }, isAdmin) {
+      commit("setIsAdmin", isAdmin);
+      localStorage.setItem("isAdmin", isAdmin);
+    },
     setLogin({ commit }, isLogin) {
       commit("setLogin", isLogin);
       localStorage.setItem("isLogin", isLogin);
@@ -187,6 +195,9 @@ const store = createStore({
     },
     isLogin(state) {
       return state.isLogin;
+    },
+    isAdmin(state) {
+      return state.isAdmin;
     },
   },
 });
