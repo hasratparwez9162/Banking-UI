@@ -12,6 +12,11 @@
         </div>
         <div class="navbar-collapse" :class="{ show: isNavOpen }">
           <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a href="/dashboard" class="nav-link" v-if="isLogin">
+                User Dashboard <i class="fas fa-chevron-down"></i>
+              </a>
+            </li>
             <!-- Account Dropdown -->
             <li class="nav-item dropdown">
               <a href="/account" class="nav-link">
@@ -37,7 +42,7 @@
             <li class="nav-item">
               <a href="/about" class="nav-link">About Us</a>
             </li>
-            <li class="nav-item" v-if="isNavOpen">
+            <li class="nav-item" v-if="isMobile">
               <a @click="logout" href="/login" class="login-btn" v-if="isLogin">
                 Log Out
               </a>
@@ -46,10 +51,16 @@
           </ul>
         </div>
         <div class="others-options" v-if="!isNavOpen">
-          <a @click="logout" href="/login" class="login-btn" v-if="isLogin">
-            Log Out
-          </a>
-          <a href="/login" class="login-btn" v-else> Log in </a>
+          <div>
+            <span>
+              <a @click="logout" v-if="isLogin" href="/login" class="login-btn">
+                Log Out
+              </a>
+            </span>
+          </div>
+          <div>
+            <a href="/login" class="login-btn" v-if="!isLogin"> Log in </a>
+          </div>
         </div>
       </nav>
     </div>
@@ -280,6 +291,8 @@ export default {
   padding: 10px 15px;
   border: 1px solid #000;
   border-radius: 5px;
+  display: inline-block;
+  margin-left: 10px;
 }
 
 .login-btn i {
