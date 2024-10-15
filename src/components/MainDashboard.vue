@@ -11,8 +11,56 @@
           </div>
           <div class="balance-subtext">Available Balance</div>
         </div>
+        <div>
+          <button class="withdraw-button" @click="onAddMoney" v-if="isAdmin">
+            Add Money
+          </button>
+          <button class="withdraw-button" @click="onWithdraw">
+            Send Money
+          </button>
+        </div>
+      </div>
+      <div v-if="showAddMoneyDialog" class="dialog-container">
+        <div class="dialog-card">
+          <div class="dialog-header">Add Money</div>
 
-        <button class="withdraw-button" @click="onWithdraw">Send Money</button>
+          <div class="dialog-body">
+            <form @submit.prevent="submitAddMoney">
+              <!--To Admin  Account Number -->
+              <div class="form-group">
+                <label for="Account">To Admin Account</label>
+                <input
+                  id="Account"
+                  v-model="AddMoneyForm.account"
+                  type="text"
+                  required
+                  disabled
+                />
+              </div>
+
+              <!-- Amount -->
+              <div class="form-group">
+                <label for="amount">Amount (₹)</label>
+                <input
+                  id="amount"
+                  v-model.trim="AddMoneyForm.amount"
+                  type="number"
+                  min="1"
+                  required
+                />
+              </div>
+            </form>
+          </div>
+
+          <div class="dialog-footer">
+            <button @click="submitAddMoney" class="btn-submit">
+              Add Money
+            </button>
+            <button @click="closeAddmoneyDialog" class="btn-cancel">
+              Cancel
+            </button>
+          </div>
+        </div>
       </div>
       <!-- Withdraw Money Dialog -->
       <div v-if="showWithdrawDialog" class="dialog-container">
@@ -131,7 +179,10 @@
       </table>
     </div>
 
-    <div v-if="activeTab === 'transactions'" class="summary-card">
+    <div
+      v-if="activeTab === 'transactions'"
+      class="summary-card ag-grid-custom-height"
+    >
       <div class="summary-header">Recent Transactions</div>
       <div v-if="sortedTransactions.length === 0" class="no-data">
         No transactions available.
@@ -139,7 +190,7 @@
       <ag-grid-vue
         v-else
         style="width: 100%; height: 100%"
-        :class="themeClass"
+        class="ag-theme-quartz"
         :columnDefs="colDefs"
         :rowData="sortedTransactions"
         :defaultColDef="defaultColDef"
@@ -250,23 +301,26 @@
             <tr v-for="loan in loans" :key="loan.loanNumber">
               <td>{{ loan.loanNumber }}</td>
               <td>{{ loan.loanType }}</td>
-              <td>₹{{ loan.amount }}</td>
-              <td>₹{{ loan.outstandingBalance }}</td>
-              <td :class="statusClass(loan.status)">{{ loan.status }}</td>
+              <td>₹{{ loan.loanAmount }}</td>
+              <td>₹{{ loan.remainingBalance }}</td>
+              <td :class="statusClass(loan.status)">{{ loan.loanStatus }}</td>
               <td class="actions">
                 <button @click="payLoan(loan.loanNumber)" class="pay-button">
                   Pay
                 </button>
-                <button
-                  @click="viewLoanDetails(loan.loanNumber)"
-                  class="details-button"
-                >
+                <button @click="openLoanDialog(loan)" class="details-button">
                   View Details
                 </button>
               </td>
             </tr>
           </tbody>
         </table>
+        <loan-details-dialog
+          :isOpen="isDialogOpen"
+          :loan="selectedLoan"
+          @close="closeLoanDialog"
+        ></loan-details-dialog>
+
         <button class="apply-button" @click="openApplyLoanDialog">
           Apply for a New Loan
         </button>
@@ -322,11 +376,13 @@ import { mapGetters, mapActions } from "vuex";
 import "ag-grid-community/styles/ag-grid.css";
 import { AgGridVue } from "ag-grid-vue3";
 import "ag-grid-community/styles/ag-theme-quartz.css";
+import LoanDetailsDialog from "./LoanDetailsDialog.vue";
 
 export default {
   name: "TheDashboard",
   components: {
     AgGridVue,
+    LoanDetailsDialog,
   },
 
   data() {
@@ -334,6 +390,7 @@ export default {
       activeTab: "accounts", // Default to accounts tab
       colDefs: [
         { headerName: "Type", field: "type" },
+
         {
           headerName: "Amount",
           field: "amount",
@@ -357,6 +414,11 @@ export default {
       },
       themeClass: "ag-theme-quartz", // Define grid theme
       loading: false,
+      showAddMoneyDialog: false,
+      AddMoneyForm: {
+        account: "",
+        amount: null,
+      },
       showWithdrawDialog: false,
       withdrawForm: {
         fromAccount: "",
@@ -374,6 +436,8 @@ export default {
         amount: "",
         tenureMonths: null,
       },
+      isDialogOpen: false,
+      selectedLoan: null,
     };
   },
   methods: {
@@ -453,6 +517,41 @@ export default {
       const responceData = await response.text();
       this.fetchUserData({ token, email });
       alert(responceData);
+    },
+    async submitAddMoney() {
+      const token = this.$store.getters.token;
+      const AddMoneyRequest = {
+        accountNumber: this.AddMoneyForm.account,
+        amount: parseFloat(this.AddMoneyForm.amount),
+        type: "CREDIT",
+      };
+      try {
+        const responce = await fetch(
+          "http://localhost:8080/account/transaction",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(AddMoneyRequest),
+          }
+        );
+        if (!responce.ok) {
+          const errorData = responce.text();
+          throw new Error(errorData);
+        }
+        const data = await responce.text();
+        console.log("Transaction successful:", data);
+        alert("Successfully transferred money!");
+        const user = JSON.parse(localStorage.getItem("user"));
+        const userId = user.id;
+        this.fetchAccounts({ token, userId });
+        this.showAddMoneyDialog = false;
+      } catch (error) {
+        console.log(error);
+        alert("Facing some internal issue try after sometime ..");
+      }
     },
     async submitWithdraw() {
       const token = this.$store.getters.token;
@@ -542,12 +641,27 @@ export default {
     closeWithdrawDialog() {
       this.showWithdrawDialog = false;
     },
+    onAddMoney() {
+      this.AddMoneyForm.account = this.accounts[0].accountNumber;
+      this.showAddMoneyDialog = true;
+    },
+    closeAddmoneyDialog() {
+      this.showAddMoneyDialog = false;
+    },
     openApplyCardDialog() {
       this.cardApplicationForm.cardHolderName = this.accounts[0].userName;
       this.showApplyCardDialog = true;
     },
     closeApplyCardDialog() {
       this.showApplyCardDialog = false;
+    },
+    openLoanDialog(loan) {
+      this.selectedLoan = loan;
+      console.log(this.selectedLoan);
+      this.isDialogOpen = true;
+    },
+    closeLoanDialog() {
+      this.isDialogOpen = false;
     },
   },
   computed: {
@@ -558,6 +672,7 @@ export default {
       "cards", // Access the cards data if needed
       "transactions", // Access the transactions data
     ]),
+    ...mapGetters(["isAdmin"]),
 
     totalBalance() {
       return this.accounts
@@ -587,10 +702,18 @@ export default {
 </script>
 
 <style scoped>
+.ag-grid-custom-height {
+  height: 400px;
+}
+
+.ag-root-wrapper-body.ag-layout-normal.ag-focus-managed {
+  height: 100% !important; /* Ensure height is 100% */
+  min-height: 0 !important;
+  flex: 1 1 auto !important;
+}
 .summary-card {
   display: flex;
   flex-direction: column;
-  height: 400px;
   background-color: white;
   padding: 20px;
   border-radius: 5px;
@@ -598,16 +721,6 @@ export default {
   margin-bottom: 20px;
 }
 
-.ag-theme-quartz .ag-root-wrapper-body.ag-layout-normal {
-  height: 100% !important; /* Ensure height is 100% */
-  min-height: 0 !important;
-  flex: 1 1 auto !important;
-}
-
-.ag-theme-quartz {
-  height: 100%;
-  width: 100%;
-}
 .container {
   width: 98%;
   margin: 20px auto;
