@@ -1,4 +1,5 @@
 <template>
+  <TheSppiner :is-loading="isLoading" :size="size" />
   <div class="container">
     <h2>Open Account</h2>
     <p>
@@ -106,12 +107,13 @@
               {{ state.name }}
             </option>
           </select>
-          <span class="error">{{ errors.state || "" }}</span>
+          <span class="error">{{ errors.selectedState || "" }}</span>
         </div>
         <!-- City Selection -->
         <div class="twoFieldContent">
-          <label for="city">City*</label>
+          <label id="city">City*</label>
           <select
+            for="city"
             :class="errors.cityClass"
             id="city"
             v-model="formData.selectedCity"
@@ -121,7 +123,7 @@
               {{ city }}
             </option>
           </select>
-          <span class="error">{{ errors.city || "" }}</span>
+          <span class="error">{{ errors.selectedCity || "" }}</span>
         </div>
       </div>
       <div class="twoFieldContainer">
@@ -149,6 +151,28 @@
           <span class="error">{{ errors.accountType || "" }}</span>
         </div>
       </div>
+      <div class="twoFieldContainer">
+        <div class="twoFieldContent">
+          <label id="image">Upload Profile Picture</label>
+          <input
+            for="image"
+            type="file"
+            @change="onFileChange($event, 'picture')"
+            accept="image/*"
+          />
+          <span class="error">{{ errors.image || "" }}</span>
+        </div>
+        <div class="twoFieldContent">
+          <label id="idProof">Upload Id Proof</label>
+          <input
+            form="idProof"
+            type="file"
+            @change="onFileChange($event, 'idProof')"
+            accept=".pdf, image/*"
+          />
+          <span class="error">{{ errors.idProof || "" }}</span>
+        </div>
+      </div>
 
       <div class="checkbox">
         <input type="checkbox" id="terms" v-model="formData.terms" />
@@ -162,48 +186,22 @@
       <button type="submit" class="submit-btn">Submit Form</button>
     </form>
 
-    <div v-if="dialog" max-width="500" class="dialog-container">
-      <div class="dialog-card">
-        <div class="headline dialog-header">Congratulations !!</div>
-        <div v-if="accountDetails" class="dialog-body">
-          <p>Account opened successfully! Here are your details:</p>
-          <p>
-            <strong>Name:</strong> {{ accountDetails.firstName }}
-            {{ accountDetails.lastName }}
-          </p>
-          <p><strong>Email:</strong> {{ accountDetails.email }}</p>
-          <p><strong>Phone Number:</strong> {{ accountDetails.phoneNumber }}</p>
-          <p>
-            <strong>Address:</strong> {{ accountDetails.address }},
-            {{ accountDetails.state }} {{ accountDetails.zip }}
-          </p>
-          <p>
-            <strong>Account Number:</strong>
-            {{ accountDetails.accounts[0].accountNumber }}
-          </p>
-          <p>
-            <strong>Balance:</strong> ₹{{ accountDetails.accounts[0].balance }}
-          </p>
-          <p>
-            <strong>Date Opened:</strong>
-            {{ accountDetails.accounts[0].dateOpened }}
-          </p>
-          <p class="note">
-            <strong>Note:</strong> Please save these details for your Net
-            Banking registration.
-          </p>
-        </div>
-        <div class="dialog-footer">
-          <div></div>
-          <button class="custom-button" @click="closeDialog">OK</button>
-        </div>
-      </div>
-    </div>
+    <SuccessDialog
+      :dialog="dialog"
+      :accountDetails="accountDetails"
+      @close="closeDialog"
+    />
   </div>
 </template>
 
 <script>
+import SuccessDialog from "./SuccessDialog.vue";
+import TheSppiner from "./TheSppiner.vue";
 export default {
+  components: {
+    SuccessDialog,
+    TheSppiner,
+  },
   data() {
     return {
       country: "India",
@@ -220,6 +218,8 @@ export default {
         selectedCity: "",
         accountType: "",
         terms: false,
+        picture: null,
+        idProof: null,
       },
       states: [],
       cities: [],
@@ -240,6 +240,8 @@ export default {
       errorMessage: null,
       dialog: false,
       accountDetails: null,
+      isLoading: false,
+      size: "100px",
     };
   },
   watch: {
@@ -276,8 +278,27 @@ export default {
     "formData.selectedCity"(newVal) {
       this.validateCity(newVal);
     },
+    "formData.picture"(newVal) {
+      this.validateimage(newVal);
+    },
+    "formData.idProof"(newVal) {
+      this.validateIdProof(newVal);
+    },
+    "formData.terms"(newVal) {
+      this.validateTerms(newVal);
+    },
   },
   methods: {
+    onFileChange(event, type) {
+      const file = event.target.files[0];
+      if (type === "picture") {
+        this.formData.picture = file;
+      } else if (type === "idProof") {
+        this.formData.idProof = file;
+        this.validateIdProof(file);
+      }
+    },
+
     validateFirstName(value) {
       const namePattern = /^[A-Za-z]+$/;
       if (!value) {
@@ -425,8 +446,35 @@ export default {
         this.errors.zip = null; // Clear error
       }
     },
-    validateTerms() {
-      if (!this.formData.terms) {
+    validateimage(value) {
+      const validTypes = ["image/jpeg", "image/png", "image/gif"];
+      if (!value) {
+        this.errors.image = "Image is required.";
+      } else if (!validTypes.includes(value.type)) {
+        this.errors.image =
+          "Invalid file type. Only JPEG, PNG, and GIF are allowed.";
+      } else if (value.size > 2 * 1024 * 1024) {
+        // 2 MB
+        this.errors.image = "File size exceeds 2 MB.";
+      } else {
+        this.errors.image = null; // Clear error
+      }
+    },
+    validateIdProof(value) {
+      const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+      if (!value) {
+        this.errors.idProof = "Id Proof is required.";
+      } else if (!validTypes.includes(value.type)) {
+        this.errors.idProof =
+          "Invalid file type. Only image and PDF files are allowed.";
+      } else if (value.size > 5 * 1024 * 1024) {
+        this.errors.idProof = "File size exceeds 5 MB.";
+      } else {
+        this.errors.idProof = null; // Clear error
+      }
+    },
+    validateTerms(value) {
+      if (!value) {
         this.errors.terms = "You must agree to the Terms and Conditions.";
       } else {
         this.errors.terms = null; // Clear error
@@ -436,31 +484,9 @@ export default {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return re.test(String(email).toLowerCase());
     },
-    async fetchCities() {
-      console.log("Fetching cities...");
-      try {
-        if (!this.formData.selectedState) return;
 
-        const response = await fetch(
-          "https://countriesnow.space/api/v0.1/countries/state/cities",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              country: this.country,
-              state: this.formData.selectedState,
-            }),
-          }
-        );
-        const data = await response.json();
-        this.cities = data.data; // Set the cities in dropdown
-      } catch (error) {
-        console.error("Error fetching cities:", error);
-      }
-    },
     async submitForm() {
+      this.isLoading = true;
       this.validateFirstName(this.formData.firstName);
       this.validateLastName(this.formData.lastName);
       this.validateEmail(this.formData.email);
@@ -471,7 +497,10 @@ export default {
       this.validateState(this.formData.selectedState);
       this.validateZip(this.formData.zip);
       this.validateAccountType(this.formData.accountType);
-      this.validateTerms();
+      this.validateTerms(this.formData.terms);
+      this.validateCity(this.formData.selectedCity);
+      this.validateimage(this.formData.picture);
+      this.validateIdProof(this.formData.idProof);
 
       // Check if any error exists in the form data
       if (
@@ -485,9 +514,13 @@ export default {
         this.errors.selectedState ||
         this.errors.zip ||
         this.errors.accountType ||
-        this.errors.terms
+        this.errors.terms ||
+        this.errors.selectedCity ||
+        this.errors.image ||
+        this.errors.idProof
       ) {
         // If any validation errors exist, return early and prevent form submission
+        this.isLoading = false;
         return;
       }
       const payload = {
@@ -499,19 +532,29 @@ export default {
         accountType: this.formData.accountType,
         alternatePhoneNumber: this.formData.alternatePhoneNumber,
         address: this.formData.address,
+        city: this.formData.selectedCity,
         state: this.formData.selectedState,
         zip: this.formData.zip,
       };
+      const formData = new FormData();
+
+      // Append user details as JSON
+      formData.append("user", JSON.stringify(payload));
+
+      // Append picture and ID proof files
+      if (this.formData.picture) {
+        formData.append("picture", this.formData.picture);
+      }
+      if (this.formData.idProof) {
+        formData.append("idProof", this.formData.idProof);
+      }
 
       try {
         console.log(payload);
         let url = "http://localhost:8080/users/open-account";
         const response = await fetch(url, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+          body: formData,
         });
 
         if (!response.ok) {
@@ -526,8 +569,10 @@ export default {
         }
 
         const result = await response.json();
+        this.isLoading = false;
         this.displayAccountDetails(result);
       } catch (error) {
+        this.isLoading = false;
         alert(error);
         console.error("Error opening account:", error);
       }
@@ -556,6 +601,30 @@ export default {
     closeDialog() {
       this.dialog = false; // Close the dialog
       this.$router.push("/"); // Redirect to the home page after closing
+    },
+    async fetchCities() {
+      console.log("Fetching cities...");
+      try {
+        if (!this.formData.selectedState) return;
+
+        const response = await fetch(
+          "https://countriesnow.space/api/v0.1/countries/state/cities",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              country: this.country,
+              state: this.formData.selectedState,
+            }),
+          }
+        );
+        const data = await response.json();
+        this.cities = data.data; // Set the cities in dropdown
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+      }
     },
     fetchStates() {
       const payload = {
