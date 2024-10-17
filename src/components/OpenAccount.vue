@@ -76,24 +76,27 @@
           <span class="error">{{ errors.alternatePhoneNumber || "" }}</span>
         </div>
       </div>
+
+      <div class="SingleContent">
+        <label for="address">Address*</label>
+        <input
+          :class="errors.addressClass"
+          type="text"
+          id="address"
+          v-model.trim="formData.address"
+        />
+        <span class="error">{{ errors.address || "" }}</span>
+      </div>
       <div class="twoFieldContainer">
-        <div class="twoFieldContent">
-          <label for="address">Address*</label>
-          <input
-            :class="errors.addressClass"
-            type="text"
-            id="address"
-            v-model.trim="formData.address"
-          />
-          <span class="error">{{ errors.address || "" }}</span>
-        </div>
         <div class="twoFieldContent">
           <label for="state">State*</label>
           <select
             :class="errors.stateClass"
             id="state"
-            v-model.trim="formData.state"
+            v-model="formData.selectedState"
+            @change="fetchCities"
           >
+            >
             <option disabled value="">Select State</option>
             <option
               v-for="state in states"
@@ -104,6 +107,21 @@
             </option>
           </select>
           <span class="error">{{ errors.state || "" }}</span>
+        </div>
+        <!-- City Selection -->
+        <div class="twoFieldContent">
+          <label for="city">City*</label>
+          <select
+            :class="errors.cityClass"
+            id="city"
+            v-model="formData.selectedCity"
+          >
+            <option disabled value="">Select City</option>
+            <option v-for="city in cities" :key="city" :value="city">
+              {{ city }}
+            </option>
+          </select>
+          <span class="error">{{ errors.city || "" }}</span>
         </div>
       </div>
       <div class="twoFieldContainer">
@@ -188,6 +206,7 @@
 export default {
   data() {
     return {
+      country: "India",
       formData: {
         firstName: "",
         lastName: "",
@@ -196,12 +215,14 @@ export default {
         phoneNumber: "",
         alternatePhoneNumber: "",
         address: "",
-        state: "",
+        selectedState: "",
         zip: "",
+        selectedCity: "",
         accountType: "",
         terms: false,
       },
       states: [],
+      cities: [],
 
       errors: {
         firstNameClass: "form-control",
@@ -214,6 +235,7 @@ export default {
         zipClass: "form-control",
         genderClass: "form-control",
         accountTypeClass: "form-control",
+        cityClass: "form-control",
       },
       errorMessage: null,
       dialog: false,
@@ -248,8 +270,11 @@ export default {
     "formData.zip"(newVal) {
       this.validateZip(newVal);
     },
-    "formData.state"(newVal) {
+    "formData.selectedState"(newVal) {
       this.validateState(newVal);
+    },
+    "formData.selectedCity"(newVal) {
+      this.validateCity(newVal);
     },
   },
   methods: {
@@ -365,16 +390,27 @@ export default {
       const statePattern = /^[A-Za-z ]+$/;
       if (!value) {
         this.errors.stateClass = "form-select-invalid";
-        this.errors.state = "State is required.";
+        this.errors.selectedState = "State is required.";
       } else if (!statePattern.test(value)) {
         this.errors.stateClass = "form-select-invalid";
-        this.errors.state = "State must contain only alphabetic characters.";
+        this.errors.selectedState =
+          "State must contain only alphabetic characters.";
       } else if (value.length < 2 || value.length > 50) {
         this.errors.stateClass = "form-select-invalid";
-        this.errors.state = "State must be between 2 and 50 characters.";
+        this.errors.selectedState =
+          "State must be between 2 and 50 characters.";
       } else {
         this.errors.stateClass = "form-select-valid";
-        this.errors.state = null; // Clear error
+        this.errors.selectedState = null; // Clear error
+      }
+    },
+    validateCity(value) {
+      if (!value) {
+        this.errors.cityClass = "form-select-invalid";
+        this.errors.selectedCity = "City is required.";
+      } else {
+        this.errors.cityClass = "form-select-valid";
+        this.errors.selectedCity = null; // Clear error
       }
     },
     validateZip(value) {
@@ -400,8 +436,58 @@ export default {
       const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       return re.test(String(email).toLowerCase());
     },
+    async fetchCities() {
+      console.log("Fetching cities...");
+      try {
+        if (!this.formData.selectedState) return;
+
+        const response = await fetch(
+          "https://countriesnow.space/api/v0.1/countries/state/cities",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              country: this.country,
+              state: this.formData.selectedState,
+            }),
+          }
+        );
+        const data = await response.json();
+        this.cities = data.data; // Set the cities in dropdown
+      } catch (error) {
+        console.error("Error fetching cities:", error);
+      }
+    },
     async submitForm() {
-      if (this.validateTerms) {
+      this.validateFirstName(this.formData.firstName);
+      this.validateLastName(this.formData.lastName);
+      this.validateEmail(this.formData.email);
+      this.validateGender(this.formData.gender);
+      this.validatePhoneNumber(this.formData.phoneNumber);
+      this.validateAlternatePhoneNumber(this.formData.alternatePhoneNumber);
+      this.validateAddress(this.formData.address);
+      this.validateState(this.formData.selectedState);
+      this.validateZip(this.formData.zip);
+      this.validateAccountType(this.formData.accountType);
+      this.validateTerms();
+
+      // Check if any error exists in the form data
+      if (
+        this.errors.firstName ||
+        this.errors.lastName ||
+        this.errors.email ||
+        this.errors.gender ||
+        this.errors.phoneNumber ||
+        this.errors.alternatePhoneNumber ||
+        this.errors.address ||
+        this.errors.selectedState ||
+        this.errors.zip ||
+        this.errors.accountType ||
+        this.errors.terms
+      ) {
+        // If any validation errors exist, return early and prevent form submission
         return;
       }
       const payload = {
@@ -413,7 +499,7 @@ export default {
         accountType: this.formData.accountType,
         alternatePhoneNumber: this.formData.alternatePhoneNumber,
         address: this.formData.address,
-        state: this.formData.state,
+        state: this.formData.selectedState,
         zip: this.formData.zip,
       };
 
@@ -455,7 +541,7 @@ export default {
         phoneNumber: "",
         alternatePhoneNumber: "",
         address: "",
-        state: "",
+        selectedState: "",
         zip: "",
         accountType: "",
         terms: false,
@@ -643,6 +729,12 @@ option {
   font-size: 14px;
   color: #856404;
   border-radius: 4px;
+}
+.SingleContent {
+  width: 90%;
+  left: 5%;
+  position: relative;
+  text-align: left;
 }
 .twoFieldContainer {
   display: flex;

@@ -10,6 +10,7 @@ import TheTest from "@/components/TheTest.vue";
 import TheLogin from "@/components/TheLogin.vue";
 import TheSignUp from "@/components/TheSignUp.vue";
 import ForgetPassword from "@/components/ForgetPassword.vue";
+import AdminDashboard from "@/components/AdminDashboard.vue";
 const routes = [
   {
     path: "/",
@@ -65,6 +66,11 @@ const routes = [
     path: "/forgetpassword",
     name: "ForgetPassword",
     component: ForgetPassword,
+  },
+  {
+    path: "/admindashboard",
+    name: "AdminDashboard",
+    component: AdminDashboard,
   },
 ];
 

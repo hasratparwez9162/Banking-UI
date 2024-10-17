@@ -1,4 +1,5 @@
 <template>
+  <TheSppiner :is-loading="isLoading" :size="size" />
   <div class="container">
     <div class="forget-password-form">
       <img src="@/assets/logo.png" alt="Logo" class="logo" />
@@ -8,6 +9,7 @@
         your password.
       </p>
       <input type="text" v-model="username" placeholder="Username/Email" />
+      <p class="success-message" v-if="message">{{ message }}</p>
       <button @click="sendResetLink">Send Reset Link</button>
       <div class="login-section">
         <p>Remembered your password? <a href="/login">Login Here</a></p>
@@ -17,14 +19,23 @@
 </template>
 
 <script>
+import TheSppiner from "./TheSppiner.vue";
 export default {
+  name: "TheLogin",
+  components: {
+    TheSppiner,
+  },
   data() {
     return {
       username: "",
+      isLoading: false,
+      size: "100px",
+      message: "",
     };
   },
   methods: {
     sendResetLink() {
+      this.isLoading = true;
       const url = `http://localhost:8080/apigateway/${this.username}/forget-password`;
 
       fetch(url, {
@@ -33,7 +44,9 @@ export default {
         .then((response) => {
           if (response.status === 200) {
             console.log("Reset link sent successfully");
-            alert("Reset link sent to your email!");
+            this.isLoading = false;
+            this.message =
+              "Reset link sent successfully. Please check your email.";
           } else if (response.status === 404) {
             return response.json().then((errorData) => {
               alert(errorData.message);
@@ -94,13 +107,17 @@ export default {
 }
 
 .forget-password-form button {
-  background-color: #4caf50;
+  background-color: #4978dd;
   color: white;
   padding: 12px 20px;
   border: none;
   border-radius: 100px;
   cursor: pointer;
   width: 100%;
+}
+.success-message {
+  color: green;
+  text-align: center;
 }
 
 .login-section {

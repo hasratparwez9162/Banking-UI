@@ -1,4 +1,5 @@
 <template>
+  <TheSppiner :is-loading="isLoading" :size="size" />
   <div class="container">
     <div class="login-form">
       <img src="@/assets/logo.png" alt="Logo" class="logo" />
@@ -17,16 +18,24 @@
 </template>
 
 <script>
+import TheSppiner from "./TheSppiner.vue";
 import CryptoJS from "crypto-js";
 export default {
+  name: "TheLogin",
+  components: {
+    TheSppiner,
+  },
   data() {
     return {
       email: "",
       password: "",
+      isLoading: false,
+      size: "100px",
     };
   },
   methods: {
-    login() {
+    async login() {
+      this.isLoading = true;
       const secretKey = CryptoJS.enc.Base64.parse(
         "E7P/iFOV3eLtlcpPQQVu5T0LVmm0Sxl2GJwHbNN9Eqg="
       );
@@ -61,17 +70,28 @@ export default {
           console.log("Login successful", data);
           const isLogin = true;
           const token = data.access_token;
-          const email = this.email;
-          if (email == "hpbanking581@gmail.com") {
-            this.$store.dispatch("setIsAdmin", true);
-          }
+
+          // Decode JWT to check roles
+          const decodedToken = JSON.parse(atob(token.split(".")[1]));
+          const roles = decodedToken.realm_access.roles;
+          const isAdmin = roles.includes("admin");
+          const email = decodedToken.email;
+
+          this.$store.dispatch("setIsAdmin", isAdmin);
+
           localStorage.setItem("token", token);
           localStorage.setItem("email", email);
           this.$store.dispatch("setToken", token);
           this.$store.dispatch("setEmail", email);
           this.fetchUserData({ token, email });
           this.$store.dispatch("setLogin", isLogin);
-          this.$router.push("/dashboard");
+          if (isAdmin) {
+            this.isLoading = false;
+            this.$router.push("/admindashboard");
+          } else {
+            this.isLoading = false;
+            this.$router.push("/dashboard");
+          }
         })
         .catch((error) => {
           console.error("Error during login", error);
@@ -79,7 +99,9 @@ export default {
         });
     },
     async fetchUserData({ token, email }) {
+      console.log("Fetching user data...");
       await this.$store.dispatch("fetchUserData", { token, email });
+      console.log("User data fetched successfully");
     },
   },
 };
@@ -99,7 +121,7 @@ export default {
 .login-form {
   padding: 40px;
   width: 400px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   border-radius: 10px;
   max-height: 70%;
   background-color: #f9f9f9;

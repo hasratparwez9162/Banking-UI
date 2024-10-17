@@ -13,7 +13,7 @@
         <div class="navbar-collapse" :class="{ show: isNavOpen }">
           <ul class="navbar-nav">
             <li class="nav-item dropdown">
-              <a href="/dashboard" class="nav-link" v-if="isLogin">
+              <a href="/dashboard" class="nav-link" v-if="isLogin && isAdmin">
                 User Dashboard <i class="fas fa-chevron-down"></i>
               </a>
             </li>
@@ -97,6 +97,7 @@ export default {
   computed: {
     ...mapGetters([
       "isLogin", // Access the cards data if needed
+      "isAdmin",
     ]),
   },
   watch: {

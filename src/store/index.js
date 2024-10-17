@@ -13,10 +13,15 @@ const store = createStore({
     email: localStorage.getItem("email") || "",
     isLogin: localStorage.getItem("isLogin") || "",
     isAdmin: localStorage.getItem("isAdmin") || "",
+    currentUser: null,
   },
   mutations: {
     setUser(state, user) {
+      console.log("Setting user:", user); // Debugging line
       state.user = user;
+    },
+    setCurrentUser(state, currentUser) {
+      state.currentUser = currentUser;
     },
     setAccounts(state, accounts) {
       state.accounts = accounts;
@@ -51,9 +56,12 @@ const store = createStore({
       console.log(state.cards);
       localStorage.setItem("cards", JSON.stringify(state.cards));
     },
+    SET_CURRENT_USER(state, user) {
+      state.currentUser = user;
+    },
   },
   actions: {
-    fetchUserData({ commit }, { token, email }) {
+    async fetchUserData({ commit }, { token, email }) {
       console.log("Fetching user data");
 
       return fetch(`http://127.0.0.1:8080/users/${email}`, {
@@ -130,6 +138,29 @@ const store = createStore({
           console.error("Error fetching accounts:", error);
         });
     },
+    async adminSearchUser({ commit }, accountNumber) {
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8080/users/account/${accountNumber}`,
+          {
+            headers: {
+              Authorization: `Bearer ${this.state.token}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`); // Check for HTTP errors
+        }
+
+        const userData = await response.json(); // Parse the JSON response
+        commit("SET_CURRENT_USER", userData); // Commit the current user data to the state
+        return userData; // Return the user data
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        throw error; // Re-throw the error to handle it in the component
+      }
+    },
     addCard({ commit }, card) {
       console.log("Add card in action");
 
@@ -175,6 +206,9 @@ const store = createStore({
     },
   },
   getters: {
+    currentUser(state) {
+      return state.currentUser;
+    },
     user(state) {
       return state.user;
     },

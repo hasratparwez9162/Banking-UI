@@ -12,56 +12,12 @@
           <div class="balance-subtext">Available Balance</div>
         </div>
         <div>
-          <button class="withdraw-button" @click="onAddMoney" v-if="isAdmin">
-            Add Money
-          </button>
           <button class="withdraw-button" @click="onWithdraw">
             Send Money
           </button>
         </div>
       </div>
-      <div v-if="showAddMoneyDialog" class="dialog-container">
-        <div class="dialog-card">
-          <div class="dialog-header">Add Money</div>
 
-          <div class="dialog-body">
-            <form @submit.prevent="submitAddMoney">
-              <!--To Admin  Account Number -->
-              <div class="form-group">
-                <label for="Account">To Admin Account</label>
-                <input
-                  id="Account"
-                  v-model="AddMoneyForm.account"
-                  type="text"
-                  required
-                  disabled
-                />
-              </div>
-
-              <!-- Amount -->
-              <div class="form-group">
-                <label for="amount">Amount (₹)</label>
-                <input
-                  id="amount"
-                  v-model.trim="AddMoneyForm.amount"
-                  type="number"
-                  min="1"
-                  required
-                />
-              </div>
-            </form>
-          </div>
-
-          <div class="dialog-footer">
-            <button @click="submitAddMoney" class="btn-submit">
-              Add Money
-            </button>
-            <button @click="closeAddmoneyDialog" class="btn-cancel">
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
       <!-- Withdraw Money Dialog -->
       <div v-if="showWithdrawDialog" class="dialog-container">
         <div class="dialog-card">
@@ -202,7 +158,7 @@
 
     <div v-if="activeTab === 'cards'" class="summary-card">
       <div class="summary-header">Your Cards</div>
-      <div v-if="true">
+      <div v-if="!cards.length == 0">
         <table class="summary-table">
           <thead>
             <tr>
@@ -226,9 +182,17 @@
               <td>{{ card.expiryDate }}</td>
               <td :class="statusClass(card.status)">{{ card.status }}</td>
               <td class="actions">
-                <button @click="blockCard(card.id)" class="block-button">
+                <button
+                  @click="blockCard(card.id)"
+                  class="block-button"
+                  v-if="card.status == 'ACTIVE'"
+                >
                   Block</button
-                ><button @click="unblockCard(card.id)" class="unblock-button">
+                ><button
+                  @click="unblockCard(card.id)"
+                  class="unblock-button"
+                  v-if="card.status == 'BLOCKED'"
+                >
                   UnBlock
                 </button>
               </td>
@@ -414,11 +378,7 @@ export default {
       },
       themeClass: "ag-theme-quartz", // Define grid theme
       loading: false,
-      showAddMoneyDialog: false,
-      AddMoneyForm: {
-        account: "",
-        amount: null,
-      },
+
       showWithdrawDialog: false,
       withdrawForm: {
         fromAccount: "",
@@ -641,13 +601,7 @@ export default {
     closeWithdrawDialog() {
       this.showWithdrawDialog = false;
     },
-    onAddMoney() {
-      this.AddMoneyForm.account = this.accounts[0].accountNumber;
-      this.showAddMoneyDialog = true;
-    },
-    closeAddmoneyDialog() {
-      this.showAddMoneyDialog = false;
-    },
+
     openApplyCardDialog() {
       this.cardApplicationForm.cardHolderName = this.accounts[0].userName;
       this.showApplyCardDialog = true;
@@ -671,8 +625,8 @@ export default {
       "loans", // Access the loans data if needed
       "cards", // Access the cards data if needed
       "transactions", // Access the transactions data
+      "isAdmin",
     ]),
-    ...mapGetters(["isAdmin"]),
 
     totalBalance() {
       return this.accounts
@@ -684,19 +638,6 @@ export default {
         (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
       );
     },
-  },
-  created() {
-    const token = this.$store.getters.token;
-    const email = this.$store.getters.email;
-
-    if (token && email) {
-      this.fetchUserData({ token, email }).then(() => {
-        if (this.accounts.length > 0) {
-          const accountNumber = this.accounts[0].accountNumber;
-          this.fetchTransactions({ token, accountNumber });
-        }
-      });
-    }
   },
 };
 </script>
