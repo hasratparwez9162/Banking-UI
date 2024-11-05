@@ -148,8 +148,11 @@ const store = createStore({
             },
           }
         );
-
-        if (!response.ok) {
+        if (response.status === 401) {
+          console.log("Unauthorized");
+          alert("Seeion Expired, Please login again");
+          return { reDirectToLogin: true };
+        } else if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`); // Check for HTTP errors
         }
 

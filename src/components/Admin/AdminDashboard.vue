@@ -82,7 +82,9 @@ export default {
     async searchUser() {
       try {
         const response = await this.adminSearchUser(this.searchAccountNumber);
-        if (response) {
+        if (response.reDirectToLogin) {
+          this.$router.push("/login");
+        } else if (response) {
           this.Currentuser = response;
         } else {
           this.Currentuser = null;

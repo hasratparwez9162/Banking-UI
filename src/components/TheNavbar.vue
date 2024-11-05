@@ -1,4 +1,5 @@
 <template>
+  <TheSppiner :is-loading="isLoading" :size="size"></TheSppiner>
   <div class="navbar-area">
     <div class="container">
       <nav class="navbar">
@@ -12,11 +13,11 @@
         </div>
         <div class="navbar-collapse" :class="{ show: isNavOpen }">
           <ul class="navbar-nav">
-            <li class="nav-item dropdown">
+            <!-- <li class="nav-item dropdown">
               <a href="/dashboard" class="nav-link" v-if="isLogin && isAdmin">
                 User Dashboard <i class="fas fa-chevron-down"></i>
               </a>
-            </li>
+            </li> -->
             <!-- Account Dropdown -->
             <li class="nav-item dropdown">
               <a href="/account" class="nav-link">
@@ -69,17 +70,26 @@
 
 <script>
 import { mapGetters } from "vuex";
+import TheSppiner from "./TheSppiner.vue";
 export default {
+  name: "TheNavbar",
+  components: {
+    TheSppiner,
+  },
   data() {
     return {
       isNavOpen: false,
       isDropdownOpen: false,
       isMobile: window.innerWidth <= 768,
+      isLoading: false,
+      size: "100px",
     };
   },
   methods: {
     logout() {
+      this.isLoading = true;
       this.$store.dispatch("logout");
+      this.isLoading = false;
     },
     toggleNav() {
       this.isNavOpen = !this.isNavOpen;

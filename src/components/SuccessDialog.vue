@@ -2,29 +2,9 @@
   <div v-if="dialog" class="dialog-container">
     <div class="dialog-card">
       <div class="headline dialog-header">Congratulations !!</div>
-      <div class="dialog-body">
-        <p>Account opened successfully! Here are your details:</p>
-        <p>
-          <strong>Name:</strong> {{ accountDetails.firstName }}
-          {{ accountDetails.lastName }}
-        </p>
-        <p><strong>Email:</strong> {{ accountDetails.email }}</p>
-        <p><strong>Phone Number:</strong> {{ accountDetails.phoneNumber }}</p>
-        <p>
-          <strong>Address:</strong> {{ accountDetails.address }},
-          {{ accountDetails.state }} {{ accountDetails.zip }}
-        </p>
-        <p>
-          <strong>Account Number:</strong>
-          {{ accountDetails.accounts[0].accountNumber }}
-        </p>
-        <p>
-          <strong>Balance:</strong> ₹{{ accountDetails.accounts[0].balance }}
-        </p>
-        <p>
-          <strong>Date Opened:</strong>
-          {{ accountDetails.accounts[0].dateOpened }}
-        </p>
+      <div class="dialog-body" v-if="accountDetails">
+        <p>successfully submitted your form, Here are your details:</p>
+        <p><strong>Application Id:</strong> {{ accountDetails }}</p>
       </div>
       <div class="dialog-footer">
         <button class="custom-button" @click="closeDialog">OK</button>

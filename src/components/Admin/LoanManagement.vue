@@ -100,7 +100,7 @@
 </template>
 
 <script>
-import LoanDetailsDialog from "./LoanDetailsDialog.vue";
+import LoanDetailsDialog from "../LoanDetailsDialog.vue";
 export default {
   name: "LoanManagement",
   components: {

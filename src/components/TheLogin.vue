@@ -88,6 +88,9 @@ export default {
           if (isAdmin) {
             this.isLoading = false;
             this.$router.push("/admindashboard");
+          } else if (roles.includes("employee")) {
+            this.isLoading = false;
+            this.$router.push("/employeedashboard");
           } else {
             this.isLoading = false;
             this.$router.push("/dashboard");
@@ -114,7 +117,7 @@ export default {
   border-radius: 10px;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   justify-content: center;
-  height: 91vh;
+  height: 100vh;
   align-items: center;
 }
 

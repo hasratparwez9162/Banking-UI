@@ -116,22 +116,26 @@
     <div v-if="activeTab === 'accounts'" class="summary-card">
       <div class="summary-header">Savings / Current Account Summary</div>
       <table class="summary-table">
-        <tr>
-          <th>Account Name</th>
-          <th>Account#</th>
-          <th>Account Type</th>
-          <th>Balance</th>
-          <th>Withdrawable</th>
-          <th>Currency</th>
-        </tr>
-        <tr v-for="account in accounts" :key="account.accountNumber">
-          <td class="highlight">{{ user.firstName }} {{ user.lastName }}</td>
-          <td>{{ account.accountNumber }}</td>
-          <td>{{ account.accountType }}</td>
-          <td class="left-align">₹{{ account.balance.toFixed(2) }}</td>
-          <td class="left-align">₹{{ account.balance.toFixed(2) }}</td>
-          <td>INR</td>
-        </tr>
+        <thead>
+          <tr>
+            <th>Account Name</th>
+            <th>Account#</th>
+            <th>Account Type</th>
+            <th>Balance</th>
+            <th>Withdrawable</th>
+            <th>Currency</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="account in accounts" :key="account.accountNumber">
+            <td class="highlight">{{ user.firstName }} {{ user.lastName }}</td>
+            <td>{{ account.accountNumber }}</td>
+            <td>{{ account.accountType }}</td>
+            <td class="left-align">₹{{ account.balance.toFixed(2) }}</td>
+            <td class="left-align">₹{{ account.balance.toFixed(2) }}</td>
+            <td>INR</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
@@ -152,13 +156,14 @@
         :defaultColDef="defaultColDef"
         :pagination="true"
         :paginationPageSize="10"
+        :paginationPageSizeSelector="[10, 20, 50, 100]"
       >
       </ag-grid-vue>
     </div>
 
     <div v-if="activeTab === 'cards'" class="summary-card">
       <div class="summary-header">Your Cards</div>
-      <div v-if="!cards.length == 0">
+      <div v-if="true">
         <table class="summary-table">
           <thead>
             <tr>
@@ -187,13 +192,13 @@
                   class="block-button"
                   v-if="card.status == 'ACTIVE'"
                 >
-                  Block</button
+                  Block Request</button
                 ><button
                   @click="unblockCard(card.id)"
                   class="unblock-button"
                   v-if="card.status == 'BLOCKED'"
                 >
-                  UnBlock
+                  UnBlock Request
                 </button>
               </td>
             </tr>
@@ -442,27 +447,8 @@ export default {
       const token = this.$store.getters.token;
       const user = JSON.parse(localStorage.getItem("user"));
       const email = user.email;
-      const response = await fetch(`http://localhost:8080/cards/block/${id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
-        const errorMessage = await response.text();
-        throw new Error(errorMessage);
-      }
-      const responceData = await response.text();
-      this.fetchUserData({ token, email });
-      alert(responceData);
-    },
-    async unblockCard(id) {
-      console.log(id);
-      const token = this.$store.getters.token;
-      const user = JSON.parse(localStorage.getItem("user"));
-      const email = user.email;
       const response = await fetch(
-        `http://localhost:8080/cards/unblock/${id}`,
+        `http://localhost:8080/cards/${id}/request-block`,
         {
           method: "PUT",
           headers: {
@@ -474,9 +460,33 @@ export default {
         const errorMessage = await response.text();
         throw new Error(errorMessage);
       }
-      const responceData = await response.text();
+      const responceData = await response.json();
+      console.log(responceData);
       this.fetchUserData({ token, email });
-      alert(responceData);
+      alert("Card blocked Request sent successfully.");
+    },
+    async unblockCard(id) {
+      console.log(id);
+      const token = this.$store.getters.token;
+      const user = JSON.parse(localStorage.getItem("user"));
+      const email = user.email;
+      const response = await fetch(
+        `http://localhost:8080/cards/${id}/request-unblock`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage);
+      }
+      const responceData = await response.json();
+      console.log(responceData);
+      this.fetchUserData({ token, email });
+      alert("Card unblocked Request sent successfully.");
     },
     async submitAddMoney() {
       const token = this.$store.getters.token;
@@ -572,7 +582,7 @@ export default {
 
       try {
         console.log(RequestBody);
-        const response = await fetch("http://localhost:8080/cards/issue", {
+        const response = await fetch("http://localhost:8080/cards/request", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -617,6 +627,10 @@ export default {
     closeLoanDialog() {
       this.isDialogOpen = false;
     },
+    payLoan(loanNumber) {
+      console.log("Paying loan:", loanNumber);
+      this.$router.push("/underdevelopment");
+    },
   },
   computed: {
     ...mapGetters([
@@ -637,6 +651,9 @@ export default {
       return [...this.transactions].sort(
         (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
       );
+    },
+    updatedCards() {
+      return [...this.cards];
     },
   },
 };

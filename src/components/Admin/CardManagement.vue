@@ -110,7 +110,7 @@ export default {
 
 .card-management button {
   padding: 8px 16px;
-  background-color: #007bff;
+  background-color: #17a2b8;
   color: white;
   border: none;
   border-radius: 4px;

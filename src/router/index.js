@@ -10,7 +10,10 @@ import TheTest from "@/components/TheTest.vue";
 import TheLogin from "@/components/TheLogin.vue";
 import TheSignUp from "@/components/TheSignUp.vue";
 import ForgetPassword from "@/components/ForgetPassword.vue";
-import AdminDashboard from "@/components/AdminDashboard.vue";
+import AdminDashboard from "@/components/Admin/AdminDashboard.vue";
+import TrackApplication from "@/components/TrackApplicationStatus.vue";
+import EmployeeDashboard from "@/components/Employee/EmployeeDashboard.vue";
+import UnderDevelopment from "@/components/UnderDevelopment.vue";
 const routes = [
   {
     path: "/",
@@ -71,6 +74,21 @@ const routes = [
     path: "/admindashboard",
     name: "AdminDashboard",
     component: AdminDashboard,
+  },
+  {
+    path: "/track-application",
+    name: "TrackApplication",
+    component: TrackApplication,
+  },
+  {
+    path: "/employeedashboard",
+    name: "EmployeeDashboard",
+    component: EmployeeDashboard,
+  },
+  {
+    path: "/underdevelopment",
+    name: "UnderDevelopment",
+    component: UnderDevelopment,
   },
 ];
 

@@ -153,7 +153,7 @@
       </div>
       <div class="twoFieldContainer">
         <div class="twoFieldContent">
-          <label id="image">Upload Profile Picture</label>
+          <label id="image">Upload Profile Picture*</label>
           <input
             for="image"
             type="file"
@@ -163,7 +163,7 @@
           <span class="error">{{ errors.image || "" }}</span>
         </div>
         <div class="twoFieldContent">
-          <label id="idProof">Upload Id Proof</label>
+          <label id="idProof">Upload Id Proof*</label>
           <input
             form="idProof"
             type="file"
@@ -188,7 +188,7 @@
 
     <SuccessDialog
       :dialog="dialog"
-      :accountDetails="accountDetails"
+      :accountDetails="openAccountDetails"
       @close="closeDialog"
     />
   </div>
@@ -197,6 +197,7 @@
 <script>
 import SuccessDialog from "./SuccessDialog.vue";
 import TheSppiner from "./TheSppiner.vue";
+import AWS from "aws-sdk";
 export default {
   components: {
     SuccessDialog,
@@ -239,7 +240,7 @@ export default {
       },
       errorMessage: null,
       dialog: false,
-      accountDetails: null,
+      openAccountDetails: null,
       isLoading: false,
       size: "100px",
     };
@@ -289,16 +290,6 @@ export default {
     },
   },
   methods: {
-    onFileChange(event, type) {
-      const file = event.target.files[0];
-      if (type === "picture") {
-        this.formData.picture = file;
-      } else if (type === "idProof") {
-        this.formData.idProof = file;
-        this.validateIdProof(file);
-      }
-    },
-
     validateFirstName(value) {
       const namePattern = /^[A-Za-z]+$/;
       if (!value) {
@@ -485,6 +476,41 @@ export default {
       return re.test(String(email).toLowerCase());
     },
 
+    onFileChange(event, type) {
+      const file = event.target.files[0];
+      if (type === "picture") {
+        this.formData.picture = file;
+      } else if (type === "idProof") {
+        this.formData.idProof = file;
+        this.validateIdProof(file);
+      }
+    },
+
+    async uploadFileToS3(file) {
+      // Step 1: Configure AWS SDK with your credentials
+      AWS.config.update({
+        accessKeyId: "AKIAZVMTVLHC3TRNHC7E",
+        secretAccessKey: "UbVGAe8fPgfs7iOIoBR6WVyAxTCkYa0XU/QEfPn0",
+        region: "ap-south-1",
+      });
+
+      const s3 = new AWS.S3();
+      const params = {
+        Bucket: "banking-aditi", // Your S3 bucket name
+        Key: `${this.formData.firstName}_${this.formData.lastName}_${this.formData.phoneNumber}${file.name}`, // The name of the file to be saved
+        Body: file, // The file itself
+      };
+
+      try {
+        // Step 2: Upload the file to S3
+        const data = await s3.upload(params).promise();
+        return data.Location; // Return the URL of the uploaded file
+      } catch (err) {
+        console.error("Error uploading file to S3:", err);
+        throw err; // Rethrow the error for handling
+      }
+    },
+
     async submitForm() {
       this.isLoading = true;
       this.validateFirstName(this.formData.firstName);
@@ -519,10 +545,30 @@ export default {
         this.errors.image ||
         this.errors.idProof
       ) {
-        // If any validation errors exist, return early and prevent form submission
         this.isLoading = false;
         return;
       }
+
+      // Step 1: Upload files to S3 and get their URLs
+      let pictureUrl = "";
+      let idProofUrl = "";
+
+      try {
+        if (this.formData.picture) {
+          pictureUrl = await this.uploadFileToS3(this.formData.picture);
+        }
+
+        if (this.formData.idProof) {
+          idProofUrl = await this.uploadFileToS3(this.formData.idProof);
+        }
+      } catch (error) {
+        this.isLoading = false;
+        alert("Error uploading files. Please try again.");
+        console.error("File upload error:", error);
+        return; // Stop further execution if there's an error
+      }
+
+      // Prepare payload with file URLs
       const payload = {
         firstName: this.formData.firstName,
         lastName: this.formData.lastName,
@@ -535,26 +581,19 @@ export default {
         city: this.formData.selectedCity,
         state: this.formData.selectedState,
         zip: this.formData.zip,
+        picturePath: pictureUrl, // Add picture URL
+        idProofPath: idProofUrl, // Add ID proof URL
       };
-      const formData = new FormData();
-
-      // Append user details as JSON
-      formData.append("user", JSON.stringify(payload));
-
-      // Append picture and ID proof files
-      if (this.formData.picture) {
-        formData.append("picture", this.formData.picture);
-      }
-      if (this.formData.idProof) {
-        formData.append("idProof", this.formData.idProof);
-      }
 
       try {
         console.log(payload);
         let url = "http://localhost:8080/users/open-account";
         const response = await fetch(url, {
           method: "POST",
-          body: formData,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         });
 
         if (!response.ok) {
@@ -562,21 +601,22 @@ export default {
           console.log(errorMessage);
           throw new Error(`HTTP error! status: ${errorMessage}`);
         } else if (response.status == 226) {
-          const errorResponce = await response.json();
-          this.errorMessage = errorResponce;
-          alert(`Warning: ${errorResponce}`);
-          throw new Error(errorResponce);
+          const errorResponse = await response.json();
+          this.errorMessage = errorResponse;
+          alert(`Warning: ${errorResponse}`);
+          throw new Error(errorResponse);
         }
 
-        const result = await response.json();
+        const result = await response.text();
         this.isLoading = false;
-        this.displayAccountDetails(result);
+        this.displayDetails(result);
       } catch (error) {
         this.isLoading = false;
         alert(error);
         console.error("Error opening account:", error);
       }
     },
+
     clearForm() {
       this.formData = {
         firstName: "",
@@ -590,10 +630,12 @@ export default {
         zip: "",
         accountType: "",
         terms: false,
+        picture: null,
+        idProof: null,
       };
     },
-    displayAccountDetails(result) {
-      this.accountDetails = result;
+    displayDetails(result) {
+      this.openAccountDetails = result;
       this.dialog = true;
       this.clearForm();
       console.log(this.accountDetails);

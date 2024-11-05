@@ -15,6 +15,11 @@
                 >Get Started</router-link
               >
             </li>
+            <li>
+              <router-link to="/track-application" class="btn btn-primary"
+                >Track Application Status</router-link
+              >
+            </li>
           </ul>
         </div>
       </div>
