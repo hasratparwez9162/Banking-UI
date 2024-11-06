@@ -13,11 +13,11 @@
         </div>
         <div class="navbar-collapse" :class="{ show: isNavOpen }">
           <ul class="navbar-nav">
-            <!-- <li class="nav-item dropdown">
+            <li class="nav-item dropdown">
               <a href="/dashboard" class="nav-link" v-if="isLogin && isAdmin">
                 User Dashboard <i class="fas fa-chevron-down"></i>
               </a>
-            </li> -->
+            </li>
             <!-- Account Dropdown -->
             <li class="nav-item dropdown">
               <a href="/account" class="nav-link">

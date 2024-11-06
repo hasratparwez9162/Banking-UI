@@ -2,7 +2,7 @@
   <div class="container">
     <div class="header">
       <h1>Get an instant Personal loan within 3 seconds</h1>
-      <button class="apply-now">APPLY NOW</button>
+      <button class="apply-now" @click="apply">APPLY NOW</button>
     </div>
     <div class="loan-container">
       <div class="loan-types">
@@ -33,7 +33,7 @@
               </ul>
             </div>
             <div class="btn-section">
-              <a class="red-btn" href="#">Apply Now</a>
+              <a class="red-btn" @click="apply">Apply Now</a>
             </div>
           </div>
 
@@ -66,7 +66,7 @@
               </ul>
             </div>
             <div class="btn-section">
-              <a class="red-btn" href="#">Apply Now</a>
+              <a class="red-btn" @click="apply">Apply Now</a>
             </div>
           </div>
           <div class="loan-card">
@@ -92,7 +92,7 @@
               </ul>
             </div>
             <div class="btn-section">
-              <a class="red-btn" href="#">Apply Now</a>
+              <a class="red-btn" @click="apply">Apply Now</a>
             </div>
           </div>
         </div>
@@ -100,7 +100,15 @@
     </div>
   </div>
 </template>
-<script></script>
+<script>
+export default {
+  methods: {
+    apply() {
+      this.$router.push("/underdevelopment");
+    },
+  },
+};
+</script>
 <style scoped>
 .container {
   width: 100%;
@@ -286,6 +294,7 @@ a.red-btn {
   width: 100%;
   max-width: 88%;
   text-decoration: none;
+  cursor: pointer;
 }
 @media (min-width: 1200px) {
   .loan-container {

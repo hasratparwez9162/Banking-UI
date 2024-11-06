@@ -43,7 +43,7 @@
           </p>
           <p>20% Instant Discount** on Food &amp; Beverages</p>
           <p>5% Instant Discount** on movie tickets</p>
-          <a class="apply-btn" href="#"> Apply </a>
+          <a class="apply-btn" @click="apply"> Apply </a>
         </div>
       </div>
     </div>
@@ -64,7 +64,7 @@
           <p>
             Eligible for Priority Pass to get access to 900+ VIP airport lounges
           </p>
-          <a class="apply-btn" href="#"> Apply </a>
+          <a class="apply-btn" @click="apply"> Apply </a>
         </div>
       </div>
     </div>
@@ -83,12 +83,22 @@
           <p>Earn 3 Reward Points* per ₹100 spent</p>
           <p>Enjoy facility of UPI Payment on Credit Card</p>
           <p>Virtual Lifetime Free Credit Card</p>
-          <a class="apply-btn" href="#"> Apply </a>
+          <a class="apply-btn" @click="apply"> Apply </a>
         </div>
       </div>
     </div>
   </div>
 </template>
+<script>
+export default {
+  name: "TheCards",
+  methods: {
+    apply() {
+      this.$router.push("/underdevelopment");
+    },
+  },
+};
+</script>
 <style scoped>
 .section-containaer {
   width: 100%;
@@ -152,7 +162,7 @@
   height: 460px; /* Keep this height */
   display: flex;
   flex-direction: column; /* Ensures that content is vertically aligned */
-  justify-content: space-between; /* Pushes the button to the bottom */
+  /* justify-content: space-between; Pushes the button to the bottom */
 }
 
 .card img {
@@ -187,6 +197,7 @@
   text-decoration: none;
   border-radius: 4px;
   margin-top: 10px;
+  cursor: pointer;
 }
 
 .card-image img {
