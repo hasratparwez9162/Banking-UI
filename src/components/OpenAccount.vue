@@ -15,6 +15,7 @@
             type="text"
             id="firstName"
             v-model.trim="formData.firstName"
+            @input="validateFirstName(formData.firstName)"
           />
           <span class="error">{{ errors.firstName || "" }}</span>
         </div>
@@ -25,6 +26,7 @@
             type="text"
             id="lastName"
             v-model.trim="formData.lastName"
+            @input="validateLastName(formData.lastName)"
           />
           <span class="error">{{ errors.lastName || "" }}</span>
         </div>
@@ -255,12 +257,12 @@ export default {
     "formData.address"(newVal) {
       this.validateAddress(newVal);
     },
-    "formData.firstName"(newVal) {
-      this.validateFirstName(newVal);
-    },
-    "formData.lastName"(newVal) {
-      this.validateLastName(newVal);
-    },
+    // "formData.firstName"(newVal) {
+    //   this.validateFirstName(newVal);
+    // },
+    // "formData.lastName"(newVal) {
+    //   this.validateLastName(newVal);
+    // },
     "formData.email"(newVal) {
       this.validateEmail(newVal);
     },
@@ -295,10 +297,13 @@ export default {
       if (!value) {
         this.errors.firstNameClass = "form-select-invalid";
         this.errors.firstName = "First name is required.";
-      } else if (value.length < 2 || value.length > 30) {
+      } else if (value.length < 2) {
         this.errors.firstNameClass = "form-select-invalid";
-        this.errors.firstName =
-          "First name must be between 2 and 30 characters.";
+        this.errors.firstName = "First name must be at least 2 characters.";
+      } else if (value.length > 30) {
+        this.errors.firstNameClass = "form-select-invalid";
+        this.errors.firstName = "First name must be at most 30 characters.";
+        this.formData.firstName = value.slice(0, 30);
       } else if (!namePattern.test(value)) {
         this.errors.firstNameClass = "form-select-invalid";
         this.errors.firstName =
@@ -316,6 +321,7 @@ export default {
       } else if (value.length < 2 || value.length > 30) {
         this.errors.lastNameClass = "form-select-invalid";
         this.errors.lastName = "Last name must be between 2 and 30 characters.";
+        this.formData.lastName = value.slice(0, 30);
       } else if (!namePattern.test(value)) {
         this.errors.lastNameClass = "form-select-invalid";
         this.errors.lastName =
