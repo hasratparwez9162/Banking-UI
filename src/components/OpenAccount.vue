@@ -495,9 +495,9 @@ export default {
     async uploadFileToS3(file) {
       // Step 1: Configure AWS SDK with your credentials
       AWS.config.update({
-        accessKeyId: "AKIAZVMTVLHC3TRNHC7E",
-        secretAccessKey: "UbVGAe8fPgfs7iOIoBR6WVyAxTCkYa0XU/QEfPn0",
-        region: "ap-south-1",
+        accessKeyId: process.env.VUE_APP_AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.VUE_APP_AWS_SECRET_ACCESS_KEY,
+        region: process.env.VUE_APP_AWS_REGION,
       });
 
       const s3 = new AWS.S3();
