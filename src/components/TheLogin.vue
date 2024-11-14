@@ -1,41 +1,67 @@
 <template>
-  <TheSppiner :is-loading="isLoading" :size="size" />
-  <div class="container">
-    <div class="login-form">
-      <img src="@/assets/logo.png" alt="Logo" class="logo" />
-      <h2>Login to Your Account</h2>
-      <input type="email" v-model="email" placeholder="Email" />
-      <input type="password" v-model="password" placeholder="Password" />
-      <a href="/forgetpassword" class="forgot-password">Forgot Password?</a>
-      <button @click="login">Sign In</button>
-      <div class="signup-section">
-        <h2>New Here?</h2>
+  <div class="container d-flex justify-content-center align-items-center">
+    <div class="card p-4 shadow-lg w-100" style="max-width: 400px">
+      <div class="text-center mb-4">
+        <img
+          src="@/assets/logo.png"
+          alt="Logo"
+          class="img-fluid mb-3"
+          style="max-width: 150px"
+        />
+        <h2 class="h4">Login to Your Account</h2>
+      </div>
+      <form @submit.prevent="login">
+        <div class="form-group">
+          <input
+            type="text"
+            v-model="email"
+            class="form-control"
+            placeholder="Username or Email"
+            required
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="password"
+            v-model="password"
+            class="form-control"
+            placeholder="Password"
+            required
+          />
+        </div>
+        <div class="d-flex justify-content-end mb-3">
+          <a href="/forgetpassword" class="text-primary">Forgot Password?</a>
+        </div>
+        <button type="submit" class="btn btn-success w-100">Sign In</button>
+      </form>
+      <hr />
+      <div class="text-center">
+        <h2 class="h3">New Here?</h2>
         <p>Sign up and discover a great amount of new features!</p>
-        <button><a href="/signup">Sign Up</a></button>
+        <button href="/signup" class="btn btn-primary w-100">Sign Up</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import TheSppiner from "./TheSppiner.vue";
 import CryptoJS from "crypto-js";
+import { mapState } from "vuex";
 export default {
   name: "TheLogin",
-  components: {
-    TheSppiner,
-  },
+
   data() {
     return {
       email: "",
       password: "",
-      isLoading: false,
-      size: "100px",
     };
+  },
+  computed: {
+    ...mapState(["isLogin"]),
   },
   methods: {
     async login() {
-      this.isLoading = true;
+      this.$store.dispatch("setIsLoading", true);
       const secretKey = CryptoJS.enc.Base64.parse(
         "E7P/iFOV3eLtlcpPQQVu5T0LVmm0Sxl2GJwHbNN9Eqg="
       );
@@ -86,19 +112,20 @@ export default {
           this.fetchUserData({ token, email });
           this.$store.dispatch("setLogin", isLogin);
           if (isAdmin) {
-            this.isLoading = false;
             this.$router.push("/admindashboard");
+            this.$store.dispatch("setIsLoading", false);
           } else if (roles.includes("employee")) {
-            this.isLoading = false;
             this.$router.push("/employeedashboard");
+            this.$store.dispatch("setIsLoading", false);
           } else {
-            this.isLoading = false;
             this.$router.push("/dashboard");
+            this.$store.dispatch("setIsLoading", false);
           }
         })
         .catch((error) => {
           console.error("Error during login", error);
           alert("Please Enter Your Correct Username/Email or Password !!");
+          this.isLoading = false;
         });
     },
     async fetchUserData({ token, email }) {
@@ -111,7 +138,13 @@ export default {
 </script>
 
 <style scoped>
-.container {
+.card {
+  border-radius: 10px;
+}
+.form-control {
+  margin-bottom: 0.625rem;
+}
+/* .container {
   display: flex;
   background-color: #fff;
   border-radius: 10px;
@@ -218,5 +251,5 @@ export default {
     padding: 20px;
     max-height: 100%;
   }
-}
+} */
 </style>

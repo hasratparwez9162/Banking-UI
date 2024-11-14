@@ -1,14 +1,26 @@
 <template>
   <the-navbar></the-navbar>
+  <the-sppiner :is-loading="isLoading" :size="size"></the-sppiner>
   <router-view class="router"></router-view>
 </template>
 
 <script>
+import TheSppiner from "./components/TheSppiner.vue";
 import TheNavbar from "./components/TheNavbar.vue";
+import { mapState } from "vuex";
 export default {
   name: "App",
   components: {
     TheNavbar,
+    TheSppiner,
+  },
+  data() {
+    return {
+      size: "100px",
+    };
+  },
+  computed: {
+    ...mapState(["isLoading"]),
   },
 };
 </script>
@@ -30,6 +42,6 @@ body {
   background-color: #f5f5f5;
 }
 .router {
-  margin-top: 60px;
+  margin-top: 5rem;
 }
 </style>

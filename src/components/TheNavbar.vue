@@ -1,69 +1,63 @@
 <template>
-  <TheSppiner :is-loading="isLoading" :size="size"></TheSppiner>
-  <div class="navbar-area">
-    <div class="container">
-      <nav class="navbar">
-        <a href="/" class="navbar-brand">
-          <img src="@/assets/logo.png" alt="logo" />
-        </a>
-        <div class="navbar-toggler" @click="toggleNav" v-if="isMobile">
-          <span class="icon-bar top-bar"></span>
-          <span class="icon-bar middle-bar"></span>
-          <span class="icon-bar bottom-bar"></span>
-        </div>
-        <div class="navbar-collapse" :class="{ show: isNavOpen }">
-          <ul class="navbar-nav">
-            <li class="nav-item dropdown">
-              <a href="/dashboard" class="nav-link" v-if="isLogin && isAdmin">
-                User Dashboard <i class="fas fa-chevron-down"></i>
-              </a>
-            </li>
-            <!-- Account Dropdown -->
-            <li class="nav-item dropdown">
-              <a href="/account" class="nav-link">
-                Account <i class="fas fa-chevron-down"></i>
-              </a>
-            </li>
+  <TheSppiner :is-loading="isLoading" :size="size" />
+  <div class="navbar-area navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container d-flex align-items-center justify-content-between">
+      <!-- Logo on the left -->
+      <a href="/" class="navbar-brand">
+        <img src="@/assets/logo.png" alt="logo" class="img-fluid" />
+      </a>
 
-            <!-- Card Dropdown -->
-            <li class="nav-item dropdown">
-              <a href="/card" class="nav-link">
-                Card <i class="fas fa-chevron-down"></i>
-              </a>
-            </li>
+      <!-- Hamburger icon for mobile view -->
+      <button
+        class="navbar-toggler"
+        type="button"
+        @click="toggleNav"
+        :aria-expanded="isNavOpen ? 'true' : 'false'"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon bgcolor"></span>
+      </button>
 
-            <!-- Loan Dropdown -->
-            <li class="nav-item dropdown">
-              <a href="/loan" class="nav-link">
-                Loan <i class="fas fa-chevron-down"></i>
-              </a>
-            </li>
+      <!-- Center navigation items -->
+      <div
+        class="collapse navbar-collapse flex-grow-1 text-center"
+        :class="{ show: isNavOpen }"
+        id="navbarNav"
+      >
+        <ul class="navbar-nav m-auto">
+          <li class="nav-item" v-if="isLogin && isAdmin">
+            <a href="/dashboard" class="nav-link">User Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a href="/account" class="nav-link">Account</a>
+          </li>
+          <li class="nav-item">
+            <a href="/card" class="nav-link">Card</a>
+          </li>
+          <li class="nav-item">
+            <a href="/loan" class="nav-link">Loan</a>
+          </li>
+          <li class="nav-item">
+            <a href="/about" class="nav-link">About Us</a>
+          </li>
 
-            <!-- Other Links -->
-            <li class="nav-item">
-              <a href="/about" class="nav-link">About Us</a>
-            </li>
-            <li class="nav-item" v-if="isMobile">
-              <a @click="logout" href="/login" class="login-btn" v-if="isLogin">
-                Log Out
-              </a>
-              <a href="/login" class="login-btn" v-else> Log in </a>
-            </li>
-          </ul>
-        </div>
-        <div class="others-options" v-if="!isNavOpen">
-          <div>
-            <span>
-              <a @click="logout" v-if="isLogin" href="/login" class="login-btn">
-                Log Out
-              </a>
-            </span>
-          </div>
-          <div>
-            <a href="/login" class="login-btn" v-if="!isLogin"> Log in </a>
-          </div>
-        </div>
-      </nav>
+          <li class="nav-item" v-if="isMobile">
+            <a @click="logout" v-if="isLogin" href="/login" class="btn ms-2">
+              Log Out
+            </a>
+            <a href="/login" class="btn ms-2" v-if="!isLogin"> Log in </a>
+          </li>
+        </ul>
+      </div>
+      <!-- Right side login/logout buttons -->
+      <div class="right-nav-item" v-if="!isMobile">
+        <li class="nav-item">
+          <a @click="logout" v-if="isLogin" href="/login" class="btn ms-2">
+            Log Out
+          </a>
+          <a href="/login" class="btn ms-2" v-if="!isLogin"> Log in </a>
+        </li>
+      </div>
     </div>
   </div>
 </template>
@@ -98,17 +92,19 @@ export default {
       this.isDropdownOpen = !this.isDropdownOpen;
     },
     handleResize() {
-      this.isMobile = window.innerWidth <= 768;
-      if (!this.isMobile) {
-        this.isNavOpen = false; // Close the nav when switching to desktop
+      // Check the current window width and update isMobile and isTablet
+      const width = window.innerWidth;
+      this.isMobile = width <= 480;
+      this.isMobile = width <= 820;
+
+      // Close the navigation on desktop and tablet when the screen is resized
+      if (width > 768) {
+        this.isNavOpen = false;
       }
     },
   },
   computed: {
-    ...mapGetters([
-      "isLogin", // Access the cards data if needed
-      "isAdmin",
-    ]),
+    ...mapGetters(["isLogin", "isAdmin"]),
   },
   watch: {
     $route() {
@@ -126,187 +122,72 @@ export default {
 
 <style scoped>
 .navbar-area {
-  width: 100%;
-  background-color: white;
-  padding: 7px 0;
   position: fixed;
+  width: 100%;
   z-index: 999;
-  transition: 0.5s;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   top: 0;
+
+  max-height: 94px;
+  height: 9%;
 }
 
-.navbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0px 3.375rem;
+.navbar-toggler {
+  border: none; /* Removes border for the button */
+}
+
+.navbar-toggler-icon {
+  background-color: #000; /* Ensures the hamburger icon is visible */
 }
 
 .navbar-brand img {
   max-width: 100px; /* Adjust as needed */
 }
 
-.navbar-toggler {
-  display: none;
-  flex-direction: column;
-  cursor: pointer;
-}
-
-.icon-bar {
-  display: block;
-  width: 30px;
-  height: 3px;
-  background-color: #000;
-  margin: 4px 0;
-}
-
-.navbar-collapse {
+.navbar-nav.m-auto {
   display: flex;
+  justify-content: center;
 }
 
-.navbar-collapse.show {
-  display: flex;
-}
-
-.navbar-nav {
-  display: flex;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.nav-item {
-  position: relative;
-}
-
-.nav-item a {
-  padding: 10px 15px;
-  text-decoration: none;
-  color: #000;
-  display: block;
-  transition: color 0.3s ease;
-}
-
-.nav-item a:focus {
-  color: #ee0979;
-  border-bottom: 1px solid #ee0979;
-}
-
-.nav-item a:hover {
-  color: #ee0979;
-  border-bottom: 1px solid #ee0979;
-}
-.login-btn:hover {
-  color: #ee0979;
-  border: 1px solid #ee0979;
-}
-
-/* Dropdown Styles */
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  background-color: white;
-  border: 1px solid #ddd;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-  display: none; /* Initially hidden */
-  min-width: 180px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px; /* Rounded corners */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
-  transform: translateY(10px);
-}
-
-.dropdown-menu li a {
-  padding: 10px 15px;
-  display: block;
-  color: #000;
-  text-decoration: none;
-  transition: background-color 0.3s ease;
-  border-radius: 4px;
-}
-
-.dropdown-menu li a:hover {
-  background-color: #f8f9fa;
-}
-
-.nav-item:hover .dropdown-menu {
-  display: block; /* Show dropdown on hover */
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0); /* Smooth transition */
-}
-
-/* Media Queries for Mobile */
-@media (max-width: 768px) {
-  .navbar-toggler {
-    display: flex;
-    position: absolute;
-    right: 1.813rem;
-  }
-  .navbar-collapse {
-    flex-direction: column;
-    width: 100%;
-    display: none;
-  }
-  .navbar-collapse.show {
-    display: block;
-  }
-  .dropdown-menu {
-    position: static;
-  }
-  .others-options {
-    position: absolute;
-    right: 5.9rem;
-  }
-  .login-btn {
-    border: none !important;
-  }
-  .navbar-nav {
-    flex-wrap: wrap;
-    position: absolute;
-    background: white;
-    border-radius: 10px;
-    width: 48%;
-    top: 105%;
-    right: 2%;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  .nav-item {
-    text-align: center;
-    border-bottom: 2px solid #c5c4c4;
-    width: 100%;
-  }
-  .nav-item:last-child {
-    border-bottom: none;
-  }
-  .nav-item a {
-    color: #374c86;
-  }
-}
-
-.others-options {
-  display: flex;
-}
-
-.login-btn {
+.container {
   display: flex;
   align-items: center;
-  text-decoration: none;
-  color: #000;
-  padding: 10px 15px;
-  border: 1px solid #000;
-  border-radius: 5px;
-  display: inline-block;
-  margin-left: 10px;
+  justify-content: space-between;
+}
+.bgcolor {
+  background-color: transparent !important;
+}
+.right-nav-item {
+  list-style: none;
 }
 
-.login-btn i {
-  margin-right: 5px;
+/* Additional mobile view adjustments */
+@media (max-width: 768px) {
+  .navbar-nav {
+    text-align: center; /* Center align nav items on mobile */
+    width: 100%; /* Ensure nav items take full width */
+  }
+
+  .navbar-collapse {
+    display: none; /* Initially hide the navbar links on mobile */
+  }
+
+  .navbar-collapse.show {
+    display: block; /* Show navbar links when toggled */
+    background-color: #f8f9fa;
+    max-width: 52%;
+    min-width: 200px;
+    position: absolute;
+    border-radius: 0px 0px 12px 12px;
+    right: 0px;
+    top: 102%;
+  }
+  .navbar-nav .nav-item .nav-link {
+    border-bottom: 2px solid grey; /* Apply border to all nav-links */
+  }
+
+  .navbar-nav .nav-item:last-child .nav-link {
+    border-bottom: none; /* Remove border for the last nav-link */
+  }
 }
 </style>

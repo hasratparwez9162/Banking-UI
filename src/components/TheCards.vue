@@ -126,7 +126,6 @@ export default {
   z-index: 2; /* Ensure text appears above the overlay */
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.7); /* Adds shadow for better readability */
   position: relative;
-  top: 46px;
 }
 
 .hero-banner-desc p {

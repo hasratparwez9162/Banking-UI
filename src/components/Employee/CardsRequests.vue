@@ -1,5 +1,5 @@
 <template>
-  <div class="card-requests-container feature-card-cards full-width">
+  <div class="card-requests-container feature-card-cards w-100">
     <button class="btn btn-back" @click="goBack">← Back</button>
     <h1>Card Requests</h1>
     <div class="ag-theme-quartz" style="height: 400px; width: 100%">

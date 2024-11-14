@@ -1,4 +1,5 @@
 <template>
+  <TheSppiner :is-loading="isLoading" :size="size" />
   <div class="container">
     <div class="login-form">
       <img src="@/assets/logo.png" alt="Logo" class="logo" />
@@ -29,7 +30,11 @@
 </template>
 
 <script>
+import TheSppiner from "./TheSppiner.vue";
 export default {
+  components: {
+    TheSppiner,
+  },
   data() {
     return {
       username: "",
@@ -39,6 +44,8 @@ export default {
       password: "",
       accountNumber: "",
       errors: {},
+      isLoading: false,
+      size: "100px",
     };
   },
   methods: {
@@ -58,6 +65,7 @@ export default {
       }
     },
     signup() {
+      this.isLoading = true;
       const signUpData = {
         username: this.username,
         firstName: this.firstname,
@@ -86,9 +94,11 @@ export default {
         .then((data) => {
           console.log("SignUp Successfully", data);
           alert("SignUp successful");
+          this.isLoading = false;
           this.$router.push("/login");
         })
         .catch((error) => {
+          this.isLoading = false;
           console.error("Error during signup", error);
         });
     },

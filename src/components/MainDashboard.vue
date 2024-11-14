@@ -1,209 +1,248 @@
 <template>
-  <div class="container">
-    <div class="header">Banking Accounts</div>
-
-    <!-- Balance Card Section -->
-    <div class="balance-card" v-if="user">
-      <div class="button-group">
-        <div>
-          <div class="balance">
-            ₹{{ totalBalance }}<span style="font-size: 24px"></span>
+  <div v-if="!isLoading">
+    <div class="mx-3 mt-4">
+      <!-- Account Balance Section -->
+      <div class="card mt-3">
+        <div class="card-body">
+          <div class="row justify-content-between align-items-center">
+            <div class="col-md-2">
+              <div class="account-balance">₹{{ totalBalance }}</div>
+              <div>Available Balance</div>
+            </div>
+            <div class="col-md-2 text-end btn-center">
+              <button class="btn btn-primary" @click="onWithdraw">
+                Send Money
+              </button>
+            </div>
           </div>
-          <div class="balance-subtext">Available Balance</div>
+          <hr />
+
+          <!-- Account Info Section -->
+          <div class="row">
+            <div class="col-6 col-md-3">
+              <div class="strong">Name</div>
+              <div>{{ user?.firstName || "" }} {{ user?.lastName }}</div>
+            </div>
+            <div class="col-6 col-md-2">
+              <div>Account Number</div>
+              <div>{{ accounts[0]?.accountNumber }}</div>
+            </div>
+            <div class="col-6 col-md-2">
+              <div>Currency</div>
+              <div>INR</div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div>Accounts Balance</div>
+              <div>₹{{ totalBalance }}</div>
+            </div>
+            <div class="col-6 col-md-2">
+              <div>Deposits</div>
+              <div>₹{{ accounts[0]?.deposits || "0.00" }}</div>
+            </div>
+          </div>
         </div>
-        <div>
-          <button class="withdraw-button" @click="onWithdraw">
-            Send Money
+      </div>
+
+      <!-- Navigation Tabs -->
+      <ul class="nav nav-tabs mt-4">
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            :class="{ active: activeTab === 'accounts' }"
+            @click="activeTab = 'accounts'"
+            href="#"
+            >Savings / Current account</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            :class="{ active: activeTab === 'transactions' }"
+            @click="changeTab('transactions')"
+            href="#"
+            >Recent Transaction</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            :class="{ active: activeTab === 'cards' }"
+            @click="activeTab = 'cards'"
+            href="#"
+            >Cards</a
+          >
+        </li>
+        <li class="nav-item">
+          <a
+            class="nav-link"
+            :class="{ active: activeTab === 'loans' }"
+            @click="activeTab = 'loans'"
+            href="#"
+            >Loans</a
+          >
+        </li>
+      </ul>
+
+      <!-- Account Summary Table -->
+      <div class="card mt-4" v-if="activeTab === 'accounts'">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Account Name</th>
+                  <th>Account#</th>
+                  <th>Account Type</th>
+                  <th>Balance</th>
+                  <th>Withdrawable</th>
+                  <th>Currency</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="account in accounts" :key="account.accountNumber">
+                  <td class="highlight">
+                    {{ user?.firstName }} {{ user?.lastName }}
+                  </td>
+                  <td>{{ account.accountNumber }}</td>
+                  <td>{{ account.accountType }}</td>
+                  <td>₹{{ account.balance.toFixed(2) }}</td>
+                  <td>₹{{ account.balance.toFixed(2) }}</td>
+                  <td>INR</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Withdraw Money Dialog -->
+    <div v-if="showWithdrawDialog" class="dialog-container">
+      <div class="dialog-card">
+        <div class="dialog-header">Send Money</div>
+
+        <div class="dialog-body">
+          <form @submit.prevent="submitWithdraw">
+            <div class="form-group">
+              <label for="fromAccount">From Account </label>
+              <input
+                id="fromAccount"
+                v-model="withdrawForm.fromAccount"
+                type="text"
+                disabled
+              />
+            </div>
+            <!--To  Account Number -->
+            <div class="form-group">
+              <label for="toAccount">To Account (Beneficiary)</label>
+              <input
+                id="toAccount"
+                v-model="withdrawForm.toAccount"
+                type="text"
+                required
+              />
+            </div>
+
+            <!-- Amount -->
+            <div class="form-group">
+              <label for="amount">Amount (₹)</label>
+              <input
+                id="amount"
+                v-model="withdrawForm.amount"
+                type="number"
+                min="1"
+                required
+              />
+            </div>
+          </form>
+        </div>
+
+        <div class="dialog-footer">
+          <button @click="submitWithdraw" class="btn-submit">Submit</button>
+          <button @click="closeWithdrawDialog" class="btn-cancel">
+            Cancel
           </button>
         </div>
       </div>
-
-      <!-- Withdraw Money Dialog -->
-      <div v-if="showWithdrawDialog" class="dialog-container">
-        <div class="dialog-card">
-          <div class="dialog-header">Send Money</div>
-
-          <div class="dialog-body">
-            <form @submit.prevent="submitWithdraw">
-              <div class="form-group">
-                <label for="fromAccount">From Account </label>
-                <input
-                  id="fromAccount"
-                  v-model="withdrawForm.fromAccount"
-                  type="text"
-                  disabled
-                />
-              </div>
-              <!--To  Account Number -->
-              <div class="form-group">
-                <label for="toAccount">To Account (Beneficiary)</label>
-                <input
-                  id="toAccount"
-                  v-model="withdrawForm.toAccount"
-                  type="text"
-                  required
-                />
-              </div>
-
-              <!-- Amount -->
-              <div class="form-group">
-                <label for="amount">Amount (₹)</label>
-                <input
-                  id="amount"
-                  v-model="withdrawForm.amount"
-                  type="number"
-                  min="1"
-                  required
-                />
-              </div>
-            </form>
-          </div>
-
-          <div class="dialog-footer">
-            <button @click="submitWithdraw" class="btn-submit">Submit</button>
-            <button @click="closeWithdrawDialog" class="btn-cancel">
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div class="horizontal-line"></div>
-      <div class="account-details">
-        <div>
-          Name<br /><span class="highlight"
-            >{{ user.firstName }} {{ user.lastName }}</span
-          >
-        </div>
-        <div>Account Number<br />{{ accounts[0]?.accountNumber }}</div>
-        <div>Currency<br />INR</div>
-        <div>Accounts balance<br />₹{{ totalBalance }}</div>
-        <div>Deposits<br />₹{{ accounts[0]?.deposits || "0.00" }}</div>
-      </div>
     </div>
-
-    <div class="tabs">
-      <div
-        class="tab"
-        :class="{ active: activeTab === 'accounts' }"
-        @click="changeTab('accounts')"
-      >
-        Savings / Current account
-      </div>
-      <div
-        class="tab"
-        :class="{ active: activeTab === 'transactions' }"
-        @click="changeTab('transactions')"
-      >
-        Recent Transaction
-      </div>
-      <div
-        class="tab"
-        :class="{ active: activeTab === 'cards' }"
-        @click="changeTab('cards')"
-      >
-        Cards
-      </div>
-      <div
-        class="tab"
-        :class="{ active: activeTab === 'loans' }"
-        @click="changeTab('loans')"
-      >
-        Loans
-      </div>
-    </div>
-
-    <div v-if="activeTab === 'accounts'" class="summary-card">
-      <div class="summary-header">Savings / Current Account Summary</div>
-      <table class="summary-table">
-        <thead>
-          <tr>
-            <th>Account Name</th>
-            <th>Account#</th>
-            <th>Account Type</th>
-            <th>Balance</th>
-            <th>Withdrawable</th>
-            <th>Currency</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="account in accounts" :key="account.accountNumber">
-            <td class="highlight">{{ user.firstName }} {{ user.lastName }}</td>
-            <td>{{ account.accountNumber }}</td>
-            <td>{{ account.accountType }}</td>
-            <td class="left-align">₹{{ account.balance.toFixed(2) }}</td>
-            <td class="left-align">₹{{ account.balance.toFixed(2) }}</td>
-            <td>INR</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
     <div
       v-if="activeTab === 'transactions'"
-      class="summary-card ag-grid-custom-height"
+      class="card mt-4 mx-3 ag-grid-custom-height"
     >
-      <div class="summary-header">Recent Transactions</div>
-      <div v-if="sortedTransactions.length === 0" class="no-data">
+      <div class="summary-header mb-3">
+        <h4 class="mt-3">Recent Transactions</h4>
+      </div>
+
+      <div
+        v-if="sortedTransactions.length === 0"
+        class="alert alert-info card mx-3"
+      >
         No transactions available.
       </div>
-      <ag-grid-vue
-        v-else
-        style="width: 100%; height: 100%"
-        class="ag-theme-quartz"
-        :columnDefs="colDefs"
-        :rowData="sortedTransactions"
-        :defaultColDef="defaultColDef"
-        :pagination="true"
-        :paginationPageSize="10"
-        :paginationPageSizeSelector="[10, 20, 50, 100]"
-      >
-      </ag-grid-vue>
+
+      <div v-else>
+        <div class="table-responsive">
+          <div class="ag-grid-container">
+            <ag-grid-vue
+              class="ag-theme-quartz w-100"
+              :columnDefs="colDefs"
+              :rowData="sortedTransactions"
+              :defaultColDef="defaultColDef"
+              :pagination="true"
+              :paginationPageSize="10"
+              :paginationPageSizeSelector="[10, 20, 50, 100]"
+              style="height: 400px"
+            >
+            </ag-grid-vue>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div v-if="activeTab === 'cards'" class="summary-card">
-      <div class="summary-header">Your Cards</div>
+    <div v-if="activeTab === 'cards'" class="card mt-4 mx-3">
       <div v-if="true">
-        <table class="summary-table">
-          <thead>
-            <tr>
-              <th>Card Number</th>
-              <th>Card Holder</th>
-              <th>Card Type</th>
-              <th>Credit Limit (₹)</th>
-              <th>Available Limit (₹)</th>
-              <th>Expiry Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="card in cards" :key="card.id">
-              <td>{{ card.cardNumber }}</td>
-              <td>{{ card.cardHolderName }}</td>
-              <td>{{ card.cardType }}</td>
-              <td>{{ card.creditLimit }}</td>
-              <td>{{ card.availableLimit }}</td>
-              <td>{{ card.expiryDate }}</td>
-              <td :class="statusClass(card.status)">{{ card.status }}</td>
-              <td class="actions">
-                <button
-                  @click="blockCard(card.id)"
-                  class="block-button"
-                  v-if="card.status == 'ACTIVE'"
-                >
-                  Block Request</button
-                ><button
-                  @click="unblockCard(card.id)"
-                  class="unblock-button"
-                  v-if="card.status == 'BLOCKED'"
-                >
-                  UnBlock Request
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-responsive mt-4">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Card Number</th>
+                <th>Card Holder</th>
+                <th>Card Type</th>
+                <th>Credit Limit (₹)</th>
+                <th>Available Limit (₹)</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="card in cards" :key="card.id">
+                <td>{{ card.cardNumber }}</td>
+                <td>{{ card.cardHolderName }}</td>
+                <td>{{ card.cardType }}</td>
+                <td>{{ card.creditLimit }}</td>
+                <td>{{ card.availableLimit }}</td>
+                <td>{{ card.expiryDate }}</td>
+                <td :class="statusClass(card.status)">{{ card.status }}</td>
+                <td class="actions">
+                  <button
+                    @click="blockCard(card.id)"
+                    class="block-button"
+                    v-if="card.status == 'ACTIVE'"
+                  >
+                    Block Request</button
+                  ><button
+                    @click="unblockCard(card.id)"
+                    class="unblock-button"
+                    v-if="card.status == 'BLOCKED'"
+                  >
+                    UnBlock Request
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <button class="apply-button" @click="openApplyCardDialog">
           Apply for a new Card
         </button>
@@ -219,6 +258,7 @@
         </div>
       </div>
     </div>
+
     <div v-if="showApplyCardDialog" class="dialog-container">
       <div class="dialog-card">
         <div class="dialog-header">Issue Credit/Debit Cards</div>
@@ -252,38 +292,39 @@
         </div>
       </div>
     </div>
-    <div v-if="activeTab === 'loans'" class="summary-card">
-      <div class="summary-header">Your Loans</div>
+    <div v-if="activeTab === 'loans'" class="card mt-4 mx-3">
       <div v-if="loans.length > 0">
-        <table class="summary-table">
-          <thead>
-            <tr>
-              <th>Loan Number</th>
-              <th>Loan Type</th>
-              <th>Amount (₹)</th>
-              <th>Outstanding Balance (₹)</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="loan in loans" :key="loan.loanNumber">
-              <td>{{ loan.loanNumber }}</td>
-              <td>{{ loan.loanType }}</td>
-              <td>₹{{ loan.loanAmount }}</td>
-              <td>₹{{ loan.remainingBalance }}</td>
-              <td :class="statusClass(loan.status)">{{ loan.loanStatus }}</td>
-              <td class="actions">
-                <button @click="payLoan(loan.loanNumber)" class="pay-button">
-                  Pay
-                </button>
-                <button @click="openLoanDialog(loan)" class="details-button">
-                  View Details
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-responsive mt-4">
+          <table class="table table-bordered mt-4">
+            <thead>
+              <tr>
+                <th>Loan Number</th>
+                <th>Loan Type</th>
+                <th>Amount (₹)</th>
+                <th>Outstanding Balance (₹)</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="loan in loans" :key="loan.loanNumber">
+                <td>{{ loan.loanNumber }}</td>
+                <td>{{ loan.loanType }}</td>
+                <td>₹{{ loan.loanAmount }}</td>
+                <td>₹{{ loan.remainingBalance }}</td>
+                <td :class="statusClass(loan.status)">{{ loan.loanStatus }}</td>
+                <td class="actions">
+                  <button @click="payLoan(loan.loanNumber)" class="pay-button">
+                    Pay
+                  </button>
+                  <button @click="openLoanDialog(loan)" class="details-button">
+                    View Details
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <loan-details-dialog
           :isOpen="isDialogOpen"
           :loan="selectedLoan"
@@ -640,6 +681,7 @@ export default {
       "cards", // Access the cards data if needed
       "transactions", // Access the transactions data
       "isAdmin",
+      "isLoading",
     ]),
 
     totalBalance() {
@@ -661,7 +703,7 @@ export default {
 
 <style scoped>
 .ag-grid-custom-height {
-  height: 400px;
+  height: 500px;
 }
 
 .ag-root-wrapper-body.ag-layout-normal.ag-focus-managed {
@@ -669,6 +711,11 @@ export default {
   min-height: 0 !important;
   flex: 1 1 auto !important;
 }
+.account-balance {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
 .summary-card {
   display: flex;
   flex-direction: column;
@@ -677,16 +724,9 @@ export default {
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
+  overflow: hidden;
 }
 
-.container {
-  width: 98%;
-  margin: 20px auto;
-  position: relative;
-  top: 48.9px;
-  overflow-x: auto; /* Enable horizontal scrolling */
-  white-space: nowrap;
-}
 .header {
   font-size: 32px;
   font-weight: bold;
@@ -764,37 +804,7 @@ export default {
   border-bottom: 2px solid #007bff;
   color: #007bff;
 }
-.summary-header {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 20px;
-}
-.summary-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.summary-table th,
-.summary-table td {
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-.summary-table th {
-  background-color: #f4f9ff;
-  font-weight: normal;
-  color: #666;
-  text-align: center;
-}
-.summary-table td {
-  color: #333;
-  text-align: center;
-}
-.summary-table .highlight {
-  color: #007bff;
-}
-.summary-table {
-  text-align: right;
-}
+
 .left-align {
   text-align: left;
 }
@@ -969,13 +979,22 @@ export default {
   .dialog-card {
     width: 90%; /* Adjust width for smaller screens */
   }
-}
-@media (max-width: 768px) {
-  .balance-card {
-    width: 176%;
+  .btn-center {
+    text-align: center !important;
   }
+}
+@media (max-width: 600px) {
   .summary-card {
-    width: 183%;
+    padding: 10px; /* Adjust padding for mobile view */
+    margin-bottom: 10px; /* Adjust margin for mobile view */
+  }
+
+  .ag-grid-custom-height {
+    height: auto; /* Adjust height for mobile view */
+  }
+
+  .ag-root-wrapper-body.ag-layout-normal.ag-focus-managed {
+    height: auto !important; /* Adjust height for mobile view */
   }
 }
 </style>

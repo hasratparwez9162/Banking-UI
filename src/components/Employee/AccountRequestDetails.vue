@@ -1,5 +1,5 @@
 <template>
-  <div class="account-request-details">
+  <div class="account-request-details w-100">
     <!-- Close button at the top-right corner -->
     <span class="close-button" @click="closeDetails">✖</span>
 

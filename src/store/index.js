@@ -14,6 +14,7 @@ const store = createStore({
     isLogin: localStorage.getItem("isLogin") || "",
     isAdmin: localStorage.getItem("isAdmin") || "",
     currentUser: null,
+    isLoading: false,
   },
   mutations: {
     setUser(state, user) {
@@ -59,86 +60,128 @@ const store = createStore({
     SET_CURRENT_USER(state, user) {
       state.currentUser = user;
     },
+    setIsLoading(state, isLoading) {
+      // Add mutation to set isLoading
+      state.isLoading = isLoading;
+    },
   },
   actions: {
-    async fetchUserData({ commit }, { token, email }) {
+    async fetchUserData({ commit, dispatch }, { token, email }) {
       console.log("Fetching user data");
 
-      return fetch(`http://127.0.0.1:8080/users/${email}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          commit("setUser", {
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-            phoneNumber: data.phoneNumber,
-          });
+      try {
+        const response = await fetch(`http://127.0.0.1:8080/users/${email}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-          commit("setAccounts", data.accounts);
-          commit("setLoans", data.loans);
-          commit("setCards", data.cards);
-          // Save data to localStorage
-          localStorage.setItem("user", JSON.stringify(data));
-          localStorage.setItem("accounts", JSON.stringify(data.accounts));
-          localStorage.setItem("loans", JSON.stringify(data.loans));
-          localStorage.setItem("cards", JSON.stringify(data.cards));
-          localStorage.setItem("token", token);
-          localStorage.setItem("email", email);
-        })
-        .catch((error) => {
-          console.error("Error fetching user data:", error);
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please log in again.");
+            dispatch("logout");
+            window.location.href = "/login";
+          } else {
+            // Handle other non-OK responses
+            const errorMessage = `Error fetching user data: ${response.status} ${response.statusText}`;
+            console.error(errorMessage);
+            throw new Error(errorMessage);
+          }
+          return;
+        }
+
+        const data = await response.json();
+        commit("setUser", {
+          firstName: data.firstName,
+          lastName: data.lastName,
+          email: data.email,
+          phoneNumber: data.phoneNumber,
         });
+
+        commit("setAccounts", data.accounts);
+        commit("setLoans", data.loans);
+        commit("setCards", data.cards);
+
+        localStorage.setItem("user", JSON.stringify(data));
+        localStorage.setItem("accounts", JSON.stringify(data.accounts));
+        localStorage.setItem("loans", JSON.stringify(data.loans));
+        localStorage.setItem("cards", JSON.stringify(data.cards));
+        localStorage.setItem("token", token);
+        localStorage.setItem("email", email);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
     },
-    fetchTransactions({ commit }, { token, accountNumber }) {
+
+    async fetchTransactions({ commit, dispatch }, { token, accountNumber }) {
       console.log(accountNumber);
-      fetch(`http://127.0.0.1:8080/account/transaction/${accountNumber}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => {
-          console.log(response);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+
+      try {
+        const response = await fetch(
+          `http://127.0.0.1:8080/account/transaction/${accountNumber}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-          return response.json();
-        })
-        .then((data) => {
-          commit("setTransactions", data);
-          localStorage.setItem("transactions", JSON.stringify(data));
-        })
-        .catch((error) => {
-          console.error("Error fetching transactions:", error);
-        });
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session timeout. Please log in again.");
+            dispatch("logout");
+            window.location.href = "/login";
+          } else {
+            const errorMessage = `Error fetching transactions: ${response.status} ${response.statusText}`;
+            console.error(errorMessage);
+            throw new Error(errorMessage);
+          }
+          return;
+        }
+
+        const data = await response.json();
+        commit("setTransactions", data);
+        localStorage.setItem("transactions", JSON.stringify(data));
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
     },
-    fetchAccounts({ commit }, { token, userId }) {
+
+    async fetchAccounts({ commit, dispatch }, { token, userId }) {
       console.log("Fetching accounts for user ID:", userId);
-      console.log(token);
-      fetch(`http://localhost:8080/account/user-account/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => {
-          console.log(response);
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+
+      try {
+        const response = await fetch(
+          `http://localhost:8080/account/user-account/${userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           }
-          return response.json();
-        })
-        .then((data) => {
-          commit("setAccounts", data);
-          localStorage.setItem("accounts", JSON.stringify(data));
-        })
-        .catch((error) => {
-          console.error("Error fetching accounts:", error);
-        });
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session timeout. Please log in again.");
+            dispatch("logout");
+            window.location.href = "/login";
+          } else {
+            const errorMessage = `Error fetching accounts: ${response.status} ${response.statusText}`;
+            console.error(errorMessage);
+            throw new Error(errorMessage);
+          }
+          return;
+        }
+
+        const data = await response.json();
+        commit("setAccounts", data);
+        localStorage.setItem("accounts", JSON.stringify(data));
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      }
     },
-    async adminSearchUser({ commit }, accountNumber) {
+
+    async adminSearchUser({ commit, dispatch }, accountNumber) {
       try {
         const response = await fetch(
           `http://127.0.0.1:8080/users/account/${accountNumber}`,
@@ -148,25 +191,31 @@ const store = createStore({
             },
           }
         );
-        if (response.status === 401) {
-          console.log("Unauthorized");
-          alert("Seeion Expired, Please login again");
-          return { reDirectToLogin: true };
-        } else if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`); // Check for HTTP errors
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            alert("Session expired. Please log in again.");
+            dispatch("logout");
+            window.location.href = "/login";
+          } else {
+            const errorMessage = `Error fetching user data: ${response.status} ${response.statusText}`;
+            console.error(errorMessage);
+            throw new Error(errorMessage);
+          }
+          return;
         }
 
-        const userData = await response.json(); // Parse the JSON response
-        commit("SET_CURRENT_USER", userData); // Commit the current user data to the state
-        return userData; // Return the user data
+        const userData = await response.json();
+        commit("SET_CURRENT_USER", userData);
+        return userData;
       } catch (error) {
         console.error("Error fetching user data:", error);
-        throw error; // Re-throw the error to handle it in the component
+        throw error;
       }
     },
+
     addCard({ commit }, card) {
       console.log("Add card in action");
-
       commit("addCard", card);
     },
 
@@ -174,18 +223,22 @@ const store = createStore({
       commit("setToken", token);
       localStorage.setItem("token", token);
     },
+
     setEmail({ commit }, email) {
       commit("setEmail", email);
       localStorage.setItem("email", email);
     },
+
     setIsAdmin({ commit }, isAdmin) {
       commit("setIsAdmin", isAdmin);
       localStorage.setItem("isAdmin", isAdmin);
     },
+
     setLogin({ commit }, isLogin) {
       commit("setLogin", isLogin);
       localStorage.setItem("isLogin", isLogin);
     },
+
     logout({ commit }) {
       // Clear Vuex state
       commit("setUser", null);
@@ -208,6 +261,7 @@ const store = createStore({
       localStorage.removeItem("isLogin");
     },
   },
+
   getters: {
     currentUser(state) {
       return state.currentUser;
@@ -235,6 +289,9 @@ const store = createStore({
     },
     isAdmin(state) {
       return state.isAdmin;
+    },
+    isLoading(state) {
+      return state.isLoading;
     },
   },
 });

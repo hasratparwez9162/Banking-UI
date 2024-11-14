@@ -131,10 +131,11 @@ export default {
 
 .card {
   margin: 20px 0;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  /* border-radius: 8px; */
   background-color: #fff;
   padding: 20px;
+  border: none;
 }
 
 .card-content {
@@ -216,13 +217,21 @@ ul li {
   }
 
   .card-group .card {
-    width: 88%;
+    width: 100%;
+    padding-top: 0;
+    padding-bottom: 0;
   }
   .header-section h1 {
     font-size: 1.5rem;
   }
   .card {
     margin: 6px 0;
+  }
+  .card-content {
+    padding: 10px;
+  }
+  .about-us {
+    margin-top: 19%;
   }
 }
 </style>

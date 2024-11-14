@@ -1,52 +1,55 @@
 <template>
   <TheSppiner :is-loading="isLoading" :size="size" />
-  <div class="container">
-    <h2>Open Account</h2>
-    <p>
-      Please enter your details and we will send a mail after successfully
+  <div class="container mt-4">
+    <h2 class="text-center">Open Account</h2>
+    <p class="text-center">
+      Please enter your details, and we will send a mail after successfully
       opening the account.
     </p>
     <form @submit.prevent="submitForm">
-      <div class="twoFieldContainer">
-        <div class="twoFieldContent">
+      <!-- Row 1: First Name and Last Name -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
           <label for="firstName">First Name*</label>
           <input
-            :class="errors.firstNameClass"
+            :class="['form-control', errors.firstNameClass]"
             type="text"
             id="firstName"
             v-model.trim="formData.firstName"
             @input="validateFirstName(formData.firstName)"
           />
-          <span class="error">{{ errors.firstName || "" }}</span>
+          <span class="text-danger">{{ errors.firstName || "" }}</span>
         </div>
-        <div class="twoFieldContent">
+        <div class="col-md-6 mb-3">
           <label for="lastName">Last Name*</label>
           <input
-            :class="errors.lastNameClass"
+            :class="['form-control', errors.lastNameClass]"
             type="text"
             id="lastName"
             v-model.trim="formData.lastName"
             @input="validateLastName(formData.lastName)"
           />
-          <span class="error">{{ errors.lastName || "" }}</span>
+          <span class="text-danger">{{ errors.lastName || "" }}</span>
         </div>
       </div>
-      <div class="twoFieldContainer">
-        <div class="twoFieldContent">
+
+      <!-- Row 2: Email and Gender -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
           <label for="email">Email*</label>
           <input
-            :class="errors.emailClass"
+            :class="['form-control', errors.emailClass]"
             type="email"
             id="email"
             v-model.trim="formData.email"
           />
-          <span class="error">{{ errors.email || "" }}</span>
+          <span class="text-danger">{{ errors.email || "" }}</span>
         </div>
-        <div class="twoFieldContent">
+        <div class="col-md-6 mb-3">
           <label for="gender">Gender*</label>
           <select
             id="gender"
-            :class="errors.genderClass"
+            :class="['form-select', errors.genderClass]"
             v-model="formData.gender"
           >
             <option disabled value="">Select Gender</option>
@@ -54,52 +57,58 @@
             <option value="Female">Female</option>
             <option value="Other">Other</option>
           </select>
-          <span class="error">{{ errors.gender || "" }}</span>
+          <span class="text-danger">{{ errors.gender || "" }}</span>
         </div>
       </div>
-      <div class="twoFieldContainer">
-        <div class="twoFieldContent">
+
+      <!-- Row 3: Phone Numbers -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
           <label for="phoneNumber">Phone Number*</label>
           <input
-            :class="errors.phoneNumberClass"
+            :class="['form-control', errors.phoneNumberClass]"
             type="tel"
             id="phoneNumber"
             v-model.trim="formData.phoneNumber"
           />
-          <span class="error">{{ errors.phoneNumber || "" }}</span>
+          <span class="text-danger">{{ errors.phoneNumber || "" }}</span>
         </div>
-        <div class="twoFieldContent">
+        <div class="col-md-6 mb-3">
           <label for="alternatePhoneNumber">Alternate Phone Number</label>
           <input
-            :class="errors.alternatePhoneNumberClass"
+            :class="['form-control', errors.alternatePhoneNumberClass]"
             type="tel"
             id="alternatePhoneNumber"
             v-model.trim="formData.alternatePhoneNumber"
           />
-          <span class="error">{{ errors.alternatePhoneNumber || "" }}</span>
+          <span class="text-danger">{{
+            errors.alternatePhoneNumber || ""
+          }}</span>
         </div>
       </div>
 
-      <div class="SingleContent">
+      <!-- Row 4: Address -->
+      <div class="mb-3">
         <label for="address">Address*</label>
         <input
-          :class="errors.addressClass"
+          :class="['form-control', errors.addressClass]"
           type="text"
           id="address"
           v-model.trim="formData.address"
         />
-        <span class="error">{{ errors.address || "" }}</span>
+        <span class="text-danger">{{ errors.address || "" }}</span>
       </div>
-      <div class="twoFieldContainer">
-        <div class="twoFieldContent">
+
+      <!-- Row 5: State and City -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
           <label for="state">State*</label>
           <select
-            :class="errors.stateClass"
+            :class="['form-select', errors.stateClass]"
             id="state"
             v-model="formData.selectedState"
             @change="fetchCities"
           >
-            >
             <option disabled value="">Select State</option>
             <option
               v-for="state in states"
@@ -109,14 +118,12 @@
               {{ state.name }}
             </option>
           </select>
-          <span class="error">{{ errors.selectedState || "" }}</span>
+          <span class="text-danger">{{ errors.selectedState || "" }}</span>
         </div>
-        <!-- City Selection -->
-        <div class="twoFieldContent">
-          <label id="city">City*</label>
+        <div class="col-md-6 mb-3">
+          <label for="city">City*</label>
           <select
-            for="city"
-            :class="errors.cityClass"
+            :class="['form-select', errors.cityClass]"
             id="city"
             v-model="formData.selectedCity"
           >
@@ -125,69 +132,83 @@
               {{ city }}
             </option>
           </select>
-          <span class="error">{{ errors.selectedCity || "" }}</span>
+          <span class="text-danger">{{ errors.selectedCity || "" }}</span>
         </div>
       </div>
-      <div class="twoFieldContainer">
-        <div class="twoFieldContent">
+
+      <!-- Row 6: Zip and Account Type -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
           <label for="zip">Zip*</label>
           <input
-            :class="errors.zipClass"
+            :class="['form-control', errors.zipClass]"
             type="text"
             id="zip"
             v-model.trim="formData.zip"
           />
-          <span class="error">{{ errors.zip || "" }}</span>
+          <span class="text-danger">{{ errors.zip || "" }}</span>
         </div>
-        <div class="twoFieldContent">
+        <div class="col-md-6 mb-3">
           <label for="accountType">Account Type*</label>
           <select
-            :class="errors.accountTypeClass"
+            :class="['form-select', errors.accountTypeClass]"
             id="accountType"
-            v-model.trim="formData.accountType"
+            v-model="formData.accountType"
           >
             <option disabled value="">Select Account Type</option>
             <option value="SAVING">Saving</option>
             <option value="CURRENT">Current</option>
           </select>
-          <span class="error">{{ errors.accountType || "" }}</span>
-        </div>
-      </div>
-      <div class="twoFieldContainer">
-        <div class="twoFieldContent">
-          <label id="image">Upload Profile Picture*</label>
-          <input
-            for="image"
-            type="file"
-            @change="onFileChange($event, 'picture')"
-            accept="image/*"
-          />
-          <span class="error">{{ errors.image || "" }}</span>
-        </div>
-        <div class="twoFieldContent">
-          <label id="idProof">Upload Id Proof*</label>
-          <input
-            form="idProof"
-            type="file"
-            @change="onFileChange($event, 'idProof')"
-            accept=".pdf, image/*"
-          />
-          <span class="error">{{ errors.idProof || "" }}</span>
+          <span class="text-danger">{{ errors.accountType || "" }}</span>
         </div>
       </div>
 
-      <div class="checkbox">
-        <input type="checkbox" id="terms" v-model="formData.terms" />
-        <label for="terms">
+      <!-- Row 7: File Uploads -->
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="image">Upload Profile Picture*</label>
+          <input
+            type="file"
+            @change="onFileChange($event, 'picture')"
+            class="form-control"
+            accept="image/*"
+          />
+          <span class="text-danger">{{ errors.image || "" }}</span>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="idProof">Upload ID Proof*</label>
+          <input
+            type="file"
+            @change="onFileChange($event, 'idProof')"
+            class="form-control"
+            accept=".pdf, image/*"
+          />
+          <span class="text-danger">{{ errors.idProof || "" }}</span>
+        </div>
+      </div>
+
+      <!-- Terms and Conditions -->
+      <div class="form-check mb-3">
+        <input
+          type="checkbox"
+          id="terms"
+          v-model="formData.terms"
+          class="form-check-input"
+        />
+        <label for="terms" class="form-check-label">
           I agree to the Terms and Conditions and authorize HP Bank to send
           mail.
         </label>
       </div>
-      <span v-if="errors.terms" class="errorterm">{{ errors.terms }}</span>
+      <span v-if="errors.terms" class="text-danger">{{ errors.terms }}</span>
 
-      <button type="submit" class="submit-btn">Submit Form</button>
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary w-100 mt-3">
+        Submit Form
+      </button>
     </form>
 
+    <!-- Success Dialog -->
     <SuccessDialog
       :dialog="dialog"
       :accountDetails="openAccountDetails"
@@ -701,6 +722,12 @@ export default {
 </script>
 
 <style scoped>
+.text-danger {
+  font-size: 12px !important;
+  text-align: left !important;
+  display: block !important;
+  margin-top: 5px !important;
+}
 .container {
   background-color: #fff;
   padding: 20px;
@@ -710,6 +737,11 @@ export default {
   margin: auto;
   margin-top: 60px;
 }
+label {
+  text-align: left;
+  display: block; /* Ensures labels take full width */
+}
+/*
 h2 {
   text-align: center;
   color: #333;
@@ -892,5 +924,5 @@ option {
   .container {
     width: 88%;
   }
-}
+} */
 </style>
