@@ -14,7 +14,7 @@
         alt="Credit card image with VISA logo and card details"
         src="https://placehold.co/300x200"
       />
-      <h3>PVR INOX HP Credit Card</h3>
+      <h3>PVR INOX Aditi Credit Card</h3>
       <p>Joining Fee: ₹ 0 | Annual Fee: INR 499</p>
       <p>
         Unlimited* Movie Tickets: one ticket for every INR 10,000 spent on the

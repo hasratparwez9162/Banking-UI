@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container-fluid">
     <div class="header">
       <h1>Track Application Status</h1>
     </div>
@@ -57,7 +57,7 @@ export default {
       if (this.status === "reject") {
         return "Application Rejected";
       } else if (this.status === "pending" || this.status === "inactive") {
-        return "Application is still under review. Please check back later.";
+        return "Application is under review. Please check back later.";
       } else if (this.status === "accept") {
         return "Application Accepted. \n Check your email for Details.";
       } else if (this.status === "notFound") {

@@ -10,11 +10,11 @@
             transactions and loan payments, all in one place.
           </p>
           <ul class="btn-list">
-            <li>
+            <!-- <li>
               <router-link to="/about#contact" class="btn btn-primary"
                 >Get Started</router-link
               >
-            </li>
+            </li> -->
             <li>
               <router-link to="/track-application" class="btn btn-primary"
                 >Track Application Status</router-link

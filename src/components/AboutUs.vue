@@ -3,7 +3,7 @@
     <!-- Header Section (Card) -->
     <section class="card">
       <div class="card-content header-section">
-        <h1>About HP Banking</h1>
+        <h1>About Aditi Banking</h1>
         <p>Your Trusted Financial Partner</p>
       </div>
     </section>
@@ -36,9 +36,9 @@
       <div class="card-content history-achievements">
         <h2>Our History & Achievements</h2>
         <p>
-          HP Banking was founded with a simple goal: to redefine the way people
-          manage their finances. Over the past decade, we have grown to become a
-          trusted name in banking, serving thousands of customers.
+          Aditi Banking was founded with a simple goal: to redefine the way
+          people manage their finances. Over the past decade, we have grown to
+          become a trusted name in banking, serving thousands of customers.
         </p>
         <ul>
           <li>Over 1 million satisfied customers</li>
@@ -106,7 +106,7 @@
     <section id="contact" class="card">
       <div class="card-content footer-section">
         <h2>Contact Us</h2>
-        <p>Email: support@hpbanking.com | Phone: +123-456-7890</p>
+        <p>Email: support@aditibanking.com | Phone: +123-456-7890</p>
         <div class="social-media">
           <a href="#">Facebook</a>
           <a href="#">Twitter</a>

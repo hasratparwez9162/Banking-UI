@@ -13,6 +13,7 @@ const store = createStore({
     email: localStorage.getItem("email") || "",
     isLogin: localStorage.getItem("isLogin") || "",
     isAdmin: localStorage.getItem("isAdmin") || "",
+    isEmployee: localStorage.getItem("isEmployee") || "",
     currentUser: null,
     isLoading: false,
   },
@@ -61,8 +62,11 @@ const store = createStore({
       state.currentUser = user;
     },
     setIsLoading(state, isLoading) {
-      // Add mutation to set isLoading
+      console.trace(isLoading);
       state.isLoading = isLoading;
+    },
+    setIsEmployee(state, setIsEmployee) {
+      state.isEmployee = setIsEmployee;
     },
   },
   actions: {
@@ -152,7 +156,7 @@ const store = createStore({
 
       try {
         const response = await fetch(
-          `http://localhost:8080/account/user-account/${userId}`,
+          `http://localhost:8080/account/user/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -233,7 +237,13 @@ const store = createStore({
       commit("setIsAdmin", isAdmin);
       localStorage.setItem("isAdmin", isAdmin);
     },
-
+    setIsEmployee({ commit }, isEmployee) {
+      commit("setIsEmployee", isEmployee);
+      localStorage.setItem("isEmployee", isEmployee);
+    },
+    setIsLoading({ commit }, isLoading) {
+      commit("setIsLoading", isLoading);
+    },
     setLogin({ commit }, isLogin) {
       commit("setLogin", isLogin);
       localStorage.setItem("isLogin", isLogin);
@@ -292,6 +302,9 @@ const store = createStore({
     },
     isLoading(state) {
       return state.isLoading;
+    },
+    isEmployee(state) {
+      return state.isEmployee;
     },
   },
 });

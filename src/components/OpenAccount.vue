@@ -196,7 +196,7 @@
           class="form-check-input"
         />
         <label for="terms" class="form-check-label">
-          I agree to the Terms and Conditions and authorize HP Bank to send
+          I agree to the Terms and Conditions and authorize Aditi Bank to send
           mail.
         </label>
       </div>
@@ -622,16 +622,18 @@ export default {
           },
           body: JSON.stringify(payload),
         });
-
-        if (!response.ok) {
-          const errorMessage = await response.json();
-          console.log(errorMessage);
-          throw new Error(`HTTP error! status: ${errorMessage}`);
+        if (response.status == 409) {
+          throw new Error(
+            "User Already Register, Please contact help desk or visit branch"
+          );
         } else if (response.status == 226) {
           const errorResponse = await response.json();
           this.errorMessage = errorResponse;
-          alert(`Warning: ${errorResponse}`);
           throw new Error(errorResponse);
+        } else if (!response.ok) {
+          const errorMessage = await response.json();
+          console.log(errorMessage);
+          throw new Error(`HTTP error! status: ${errorMessage}`);
         }
 
         const result = await response.text();
@@ -735,7 +737,7 @@ export default {
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 40%;
   margin: auto;
-  margin-top: 60px;
+  margin-top: 67px !important;
 }
 label {
   text-align: left;

@@ -1,5 +1,4 @@
 <template>
-  <TheSppiner :is-loading="isLoading" :size="size" />
   <div class="navbar-area navbar navbar-expand-lg navbar-light bg-light">
     <div class="container d-flex align-items-center justify-content-between">
       <!-- Logo on the left -->
@@ -25,7 +24,7 @@
         id="navbarNav"
       >
         <ul class="navbar-nav m-auto">
-          <li class="nav-item" v-if="isLogin && isAdmin">
+          <li class="nav-item" v-if="isLogin && !isAdmin && !isEmployee">
             <a href="/dashboard" class="nav-link">User Dashboard</a>
           </li>
           <li class="nav-item">
@@ -52,10 +51,17 @@
       <!-- Right side login/logout buttons -->
       <div class="right-nav-item" v-if="!isMobile">
         <li class="nav-item">
-          <a @click="logout" v-if="isLogin" href="/login" class="btn ms-2">
+          <a
+            @click="logout"
+            v-if="isLogin"
+            href="/login"
+            class="btn btn-outline-primary ms-2"
+          >
             Log Out
           </a>
-          <a href="/login" class="btn ms-2" v-if="!isLogin"> Log in </a>
+          <a href="/login" class="btn ms-2 btn-outline-primary" v-if="!isLogin">
+            Log in
+          </a>
         </li>
       </div>
     </div>
@@ -64,26 +70,23 @@
 
 <script>
 import { mapGetters } from "vuex";
-import TheSppiner from "./TheSppiner.vue";
+
 export default {
   name: "TheNavbar",
-  components: {
-    TheSppiner,
-  },
+
   data() {
     return {
       isNavOpen: false,
       isDropdownOpen: false,
       isMobile: window.innerWidth <= 768,
-      isLoading: false,
       size: "100px",
     };
   },
   methods: {
     logout() {
-      this.isLoading = true;
+      this.$store.dispatch("setIsLoading", true);
       this.$store.dispatch("logout");
-      this.isLoading = false;
+      this.$store.dispatch("setIsLoading", false);
     },
     toggleNav() {
       this.isNavOpen = !this.isNavOpen;
@@ -104,7 +107,7 @@ export default {
     },
   },
   computed: {
-    ...mapGetters(["isLogin", "isAdmin"]),
+    ...mapGetters(["isLogin", "isAdmin", "isEmployee"]),
   },
   watch: {
     $route() {

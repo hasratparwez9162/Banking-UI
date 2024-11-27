@@ -19,82 +19,103 @@ const routes = [
     path: "/",
     name: "Landing",
     component: Landing,
+    meta: { title: "Home - Aditi Banking" },
   },
   {
     path: "/open-account",
     name: "OpenAccount",
     component: OpenAccount,
+    meta: { title: "Open Account - Aditi Banking" },
   },
   {
     path: "/dashboard",
     name: "MainDashboard",
     component: MainDashboard,
+    meta: { title: "User Dashboard - Aditi Banking" },
   },
   {
     path: "/account",
     name: "TheAccount",
     component: TheAccount,
+    meta: { title: "Account - Aditi Banking" },
   },
   {
     path: "/card",
     name: "TheCards",
     component: TheCards,
+    meta: { title: "Cards - Aditi Banking" },
   },
   {
     path: "/loan",
     name: "TheLoan",
     component: TheLoan,
+    meta: { title: "Loans - Aditi Banking" },
   },
   {
     path: "/about",
     name: "AboutUs",
     component: AboutUs,
+    meta: { title: "About Us - Aditi Banking" },
   },
   {
     path: "/test",
     name: "TheTest",
     component: TheTest,
+    meta: { title: "Test Page - Aditi Banking" },
   },
   {
     path: "/login",
     name: "TheLogin",
     component: TheLogin,
+    meta: { title: "Login - Aditi Banking" },
   },
   {
     path: "/signup",
     name: "TheSignup",
     component: TheSignUp,
+    meta: { title: "Sign Up - Aditi Banking" },
   },
   {
     path: "/forgetpassword",
     name: "ForgetPassword",
     component: ForgetPassword,
+    meta: { title: "Forget Password - Aditi Banking" },
   },
   {
     path: "/admindashboard",
     name: "AdminDashboard",
     component: AdminDashboard,
+    meta: { title: "Admin Dashboard - Aditi Banking" },
   },
   {
     path: "/track-application",
     name: "TrackApplication",
     component: TrackApplication,
+    meta: { title: "Track Application - Aditi Banking" },
   },
   {
     path: "/employeedashboard",
     name: "EmployeeDashboard",
     component: EmployeeDashboard,
+    meta: { title: "Employee Dashboard - Aditi Banking" },
   },
   {
     path: "/underdevelopment",
     name: "UnderDevelopment",
     component: UnderDevelopment,
+    meta: { title: "UnderDevelopment - Aditi Banking" },
   },
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+router.beforeEach((to, from, next) => {
+  if (to.meta.title) {
+    document.title = to.meta.title; // Update the tab title
+  }
+  next();
 });
 
 export default router;

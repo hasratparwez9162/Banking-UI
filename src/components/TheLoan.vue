@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container-fluid">
     <div class="header">
       <h1>Get an instant Personal loan within 3 seconds</h1>
       <button class="apply-now" @click="apply">APPLY NOW</button>
@@ -292,7 +292,7 @@ a.red-btn {
   transition: all 0.5s ease-in-out;
   padding: 10px;
   width: 100%;
-  max-width: 88%;
+  max-width: 96%;
   text-decoration: none;
   cursor: pointer;
 }

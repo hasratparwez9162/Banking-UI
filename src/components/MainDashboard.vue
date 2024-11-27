@@ -457,13 +457,13 @@ export default {
     changeTab(tab) {
       this.activeTab = tab;
       const token = this.$store.getters.token; // Get token from Vuex store
-      const user = JSON.parse(localStorage.getItem("user"));
-      const email = user.email;
+      // const user = JSON.parse(localStorage.getItem("user"));
+      // const email = user.email;
 
       if (tab === "transactions" && this.user && this.accounts.length > 0) {
         const accountNumber = this.accounts[0].accountNumber;
         this.fetchTransactions({ token, accountNumber });
-        this.fetchUserData({ token, email });
+        // this.fetchUserData({ token, email });
       }
     },
 

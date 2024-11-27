@@ -33,7 +33,7 @@
         />
       </div>
       <div class="card-info">
-        <h3>PVR INOX HP Credit Card</h3>
+        <h3>PVR INOX Aditi Credit Card</h3>
         <p class="fee-info">Joining Fee: ₹ 0 | Annual Fee: INR 499</p>
 
         <div class="card-content">
