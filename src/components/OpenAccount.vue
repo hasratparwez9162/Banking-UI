@@ -65,22 +65,28 @@
       <div class="row">
         <div class="col-md-6 mb-3">
           <label for="phoneNumber">Phone Number*</label>
-          <input
-            :class="['form-control', errors.phoneNumberClass]"
-            type="tel"
-            id="phoneNumber"
-            v-model.trim="formData.phoneNumber"
-          />
+          <div class="input-group">
+            <div class="input-group-text">+91</div>
+            <input
+              :class="['form-control', errors.phoneNumberClass]"
+              type="tel"
+              id="phoneNumber"
+              v-model.trim="formData.phoneNumber"
+            />
+          </div>
           <span class="text-danger">{{ errors.phoneNumber || "" }}</span>
         </div>
         <div class="col-md-6 mb-3">
           <label for="alternatePhoneNumber">Alternate Phone Number</label>
-          <input
-            :class="['form-control', errors.alternatePhoneNumberClass]"
-            type="tel"
-            id="alternatePhoneNumber"
-            v-model.trim="formData.alternatePhoneNumber"
-          />
+          <div class="input-group">
+            <div class="input-group-text">+91</div>
+            <input
+              :class="['form-control', errors.alternatePhoneNumberClass]"
+              type="tel"
+              id="alternatePhoneNumber"
+              v-model.trim="formData.alternatePhoneNumber"
+            />
+          </div>
           <span class="text-danger">{{
             errors.alternatePhoneNumber || ""
           }}</span>
@@ -374,33 +380,49 @@ export default {
       }
     },
     validatePhoneNumber(value) {
+      const phoneRegex = /^[0-9]{10}$/; // Matches all required formats
+
       if (!value) {
         this.errors.phoneNumberClass = "form-select-invalid";
         this.errors.phoneNumber = "Phone number is required.";
-      } else if (!/^\d{10}$/.test(value)) {
+      } else if (!phoneRegex.test(value)) {
         this.errors.phoneNumberClass = "form-select-invalid";
-        this.errors.phoneNumber = "Phone number must be exactly 10 digits.";
+        this.errors.phoneNumber =
+          "Phone number must be a valid 10-digit number.";
       } else {
         this.errors.phoneNumberClass = "form-select-valid";
         this.errors.phoneNumber = null; // Clear error
       }
     },
+
     validateAlternatePhoneNumber(value) {
+      const phoneRegex = /^[0-9]{10}$/; // Matches all required formats
+
       if (!value) {
-        this.errors.alternatePhoneNumber = "";
-      } else if (!/^\d{10}$/.test(value)) {
+        // Alternate phone number is optional, so clear the error if it's not provided.
+        this.errors.alternatePhoneNumberClass = null;
+        this.errors.alternatePhoneNumber = null;
+      } else if (!phoneRegex.test(value)) {
+        // Invalid phone number format
         this.errors.alternatePhoneNumberClass = "form-select-invalid";
         this.errors.alternatePhoneNumber =
-          "Alternate Phone number must be exactly 10 digits.";
-      } else if (value == this.formData.phoneNumber) {
+          "Alternate Phone number must be a valid 10-digit number.";
+      } else if (
+        this.formData.phoneNumber &&
+        value.replace(/\s+/g, "") ===
+          this.formData.phoneNumber.replace(/\s+/g, "")
+      ) {
+        // Alternate phone number matches the primary phone number
         this.errors.alternatePhoneNumberClass = "form-select-invalid";
         this.errors.alternatePhoneNumber =
-          "Alternate Number Should be diffrent from Phone number";
+          "Alternate Phone Number should be different from Phone Number.";
       } else {
+        // Valid alternate phone number
         this.errors.alternatePhoneNumberClass = "form-select-valid";
         this.errors.alternatePhoneNumber = null; // Clear error
       }
     },
+
     validateAccountType(value) {
       if (!value) {
         this.errors.accountTypeClass = "form-select-invalid";
