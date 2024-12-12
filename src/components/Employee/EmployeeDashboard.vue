@@ -1,11 +1,15 @@
 <template>
-  <div class="dashboard-container">
+  <div>
     <h1>Employee Dashboard</h1>
     <hr />
     <CardRequests
       v-if="currentFeature === 'cardRequests'"
       @backToDashboard="goBack"
     />
+    <AccountManagement
+      v-if="currentFeature === 'manageAccount'"
+      @backToDashboard="goBack"
+    ></AccountManagement>
     <!-- Feature Section: Account Opening Requests -->
     <div class="feature-section" v-if="currentFeature === 'accountRequests'">
       <div class="feature-card full-width">
@@ -85,6 +89,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Quartz theme CSS
 import AccountRequestDetails from "./AccountRequestDetails.vue";
 import CustomRenderComponent from "../CustomRenderComponent.vue";
 import CardRequests from "./CardsRequests.vue";
+import AccountManagement from "./AccountManagement.vue";
 
 export default {
   name: "EmployeeDashboard",
@@ -93,6 +98,7 @@ export default {
     AccountRequestDetails,
     CustomRenderComponent, // Register your custom cell renderer
     CardRequests,
+    AccountManagement,
   },
   data() {
     return {
@@ -166,6 +172,10 @@ export default {
     },
     viewCardRequests() {
       this.currentFeature = "cardRequests";
+      this.featureSection = false;
+    },
+    openManageAccountModal() {
+      this.currentFeature = "manageAccount";
       this.featureSection = false;
     },
     onGridReady(params) {

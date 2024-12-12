@@ -100,6 +100,7 @@ const store = createStore({
           lastName: data.lastName,
           email: data.email,
           phoneNumber: data.phoneNumber,
+          picturePath: data.picturePath,
         });
 
         commit("setAccounts", data.accounts);

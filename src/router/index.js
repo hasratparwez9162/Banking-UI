@@ -14,6 +14,8 @@ import AdminDashboard from "@/components/Admin/AdminDashboard.vue";
 import TrackApplication from "@/components/TrackApplicationStatus.vue";
 import EmployeeDashboard from "@/components/Employee/EmployeeDashboard.vue";
 import UnderDevelopment from "@/components/UnderDevelopment.vue";
+import AccountManagement from "@/components/Employee/AccountManagement.vue";
+import ProfileInfo from "@/components/ProfileInfo.vue";
 const routes = [
   {
     path: "/",
@@ -82,6 +84,13 @@ const routes = [
     meta: { title: "Forget Password - Aditi Banking" },
   },
   {
+    path: "/profile",
+    name: "Profile",
+    component: ProfileInfo,
+    meta: { title: "Profile - Aditi Banking" },
+  },
+
+  {
     path: "/admindashboard",
     name: "AdminDashboard",
     component: AdminDashboard,
@@ -104,6 +113,12 @@ const routes = [
     name: "UnderDevelopment",
     component: UnderDevelopment,
     meta: { title: "UnderDevelopment - Aditi Banking" },
+  },
+  {
+    path: "/ac-management",
+    name: "Account Management",
+    component: AccountManagement,
+    meta: { title: "Account Management - Aditi Banking" },
   },
 ];
 

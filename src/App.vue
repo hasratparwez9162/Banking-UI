@@ -41,7 +41,7 @@ body {
   overflow-x: hidden; /* Prevent horizontal scrolling */
   background-color: #f5f5f5;
 }
-.router {
+/* .router {
   margin-top: 5rem;
-}
+} */
 </style>

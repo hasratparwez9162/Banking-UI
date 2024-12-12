@@ -1,9 +1,16 @@
 <template>
   <div class="navbar-area navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container d-flex align-items-center justify-content-between">
+    <div
+      class="container-fluid px-5 d-flex align-items-center justify-content-between"
+    >
       <!-- Logo on the left -->
       <a href="/" class="navbar-brand">
-        <img src="@/assets/logo.png" alt="logo" class="img-fluid" />
+        <img
+          src="@/assets/logo.png"
+          alt="logo"
+          class="img-fluid"
+          style="max-width: 120px"
+        />
       </a>
 
       <!-- Hamburger icon for mobile view -->
@@ -24,173 +31,117 @@
         id="navbarNav"
       >
         <ul class="navbar-nav m-auto">
-          <li class="nav-item" v-if="isLogin && !isAdmin && !isEmployee">
-            <a href="/dashboard" class="nav-link">User Dashboard</a>
-          </li>
           <li class="nav-item">
             <a href="/account" class="nav-link">Account</a>
           </li>
           <li class="nav-item">
             <a href="/card" class="nav-link">Card</a>
           </li>
+
           <li class="nav-item">
             <a href="/loan" class="nav-link">Loan</a>
           </li>
           <li class="nav-item">
             <a href="/about" class="nav-link">About Us</a>
           </li>
-
-          <li class="nav-item" v-if="isMobile">
-            <a @click="logout" v-if="isLogin" href="/login" class="btn ms-2">
-              Log Out
-            </a>
-            <a href="/login" class="btn ms-2" v-if="!isLogin"> Log in </a>
-          </li>
         </ul>
       </div>
-      <!-- Right side login/logout buttons -->
-      <div class="right-nav-item" v-if="!isMobile">
-        <li class="nav-item">
-          <a
-            @click="logout"
-            v-if="isLogin"
-            href="/login"
-            class="btn btn-outline-primary ms-2"
+
+      <!-- Right side circular user avatar -->
+      <div class="right-nav-item" v-if="isLogin">
+        <div class="dropdown">
+          <img
+            v-if="userPicture"
+            :src="userPicture"
+            :alt="userName"
+            class="rounded-circle user-avatar"
+            id="userDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          />
+          <i
+            v-else
+            class="bi bi-person fs-3"
+            aria-hidden="true"
+            id="userDropdown"
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+          ></i>
+
+          <ul
+            class="dropdown-menu dropdown-menu-end"
+            aria-labelledby="userDropdown"
           >
-            Log Out
-          </a>
-          <a href="/login" class="btn ms-2 btn-outline-primary" v-if="!isLogin">
-            Log in
-          </a>
-        </li>
+            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+
+            <li>
+              <hr class="dropdown-divider" />
+            </li>
+            <li>
+              <a class="dropdown-item" @click="logout" href="#">Logout</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Login button when not logged in -->
+      <div class="right-nav-item" v-else>
+        <a href="/login" class="btn btn-outline-primary ms-2">Log in</a>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapGetters } from "vuex";
+import { mapGetters, mapState } from "vuex";
 
 export default {
   name: "TheNavbar",
-
   data() {
     return {
       isNavOpen: false,
-      isDropdownOpen: false,
-      isMobile: window.innerWidth <= 768,
-      size: "100px",
+      // Replace with dynamic user image URL
     };
   },
   methods: {
     logout() {
       this.$store.dispatch("setIsLoading", true);
-      this.$store.dispatch("logout");
-      this.$store.dispatch("setIsLoading", false);
+      this.$router.push("/login").then(() => {
+        this.$store.dispatch("logout");
+        this.$store.dispatch("setIsLoading", false);
+      });
     },
     toggleNav() {
       this.isNavOpen = !this.isNavOpen;
     },
-    toggleDropdown() {
-      this.isDropdownOpen = !this.isDropdownOpen;
-    },
-    handleResize() {
-      // Check the current window width and update isMobile and isTablet
-      const width = window.innerWidth;
-      this.isMobile = width <= 480;
-      this.isMobile = width <= 820;
-
-      // Close the navigation on desktop and tablet when the screen is resized
-      if (width > 768) {
-        this.isNavOpen = false;
-      }
-    },
   },
   computed: {
     ...mapGetters(["isLogin", "isAdmin", "isEmployee"]),
-  },
-  watch: {
-    $route() {
-      this.isNavOpen = false; // Close the nav on route change
+    ...mapState({
+      user: (state) => state.user,
+    }),
+    userName() {
+      return this.user?.firstName || "Guest"; // Safely access user name
     },
-  },
-  mounted() {
-    window.addEventListener("resize", this.handleResize);
-  },
-  beforeUnmount() {
-    window.removeEventListener("resize", this.handleResize);
+    userPicture() {
+      return this.user?.picturePath;
+    },
   },
 };
 </script>
 
 <style scoped>
-.navbar-area {
-  position: fixed;
-  width: 100%;
-  z-index: 999;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  top: 0;
-
-  max-height: 94px;
-  height: 9%;
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  object-fit: cover; /* Ensures the image fits within the circle */
 }
 
-.navbar-toggler {
-  border: none; /* Removes border for the button */
-}
-
-.navbar-toggler-icon {
-  background-color: #000; /* Ensures the hamburger icon is visible */
-}
-
-.navbar-brand img {
-  max-width: 100px; /* Adjust as needed */
-}
-
-.navbar-nav.m-auto {
-  display: flex;
-  justify-content: center;
-}
-
-.container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.bgcolor {
-  background-color: transparent !important;
-}
-.right-nav-item {
-  list-style: none;
-}
-
-/* Additional mobile view adjustments */
-@media (max-width: 768px) {
-  .navbar-nav {
-    text-align: center; /* Center align nav items on mobile */
-    width: 100%; /* Ensure nav items take full width */
-  }
-
-  .navbar-collapse {
-    display: none; /* Initially hide the navbar links on mobile */
-  }
-
-  .navbar-collapse.show {
-    display: block; /* Show navbar links when toggled */
-    background-color: #f8f9fa;
-    max-width: 52%;
-    min-width: 200px;
-    position: absolute;
-    border-radius: 0px 0px 12px 12px;
-    right: 0px;
-    top: 102%;
-  }
-  .navbar-nav .nav-item .nav-link {
-    border-bottom: 2px solid grey; /* Apply border to all nav-links */
-  }
-
-  .navbar-nav .nav-item:last-child .nav-link {
-    border-bottom: none; /* Remove border for the last nav-link */
-  }
+.dropdown-menu {
+  min-width: 150px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  padding: 10px;
 }
 </style>

@@ -8,6 +8,7 @@ import store from "./store/index.js";
 
 // Import Bootstrap CSS and optionally JavaScript
 import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "bootstrap"; // Optional: if you need Bootstrap's JavaScript components
 
 // Add FontAwesome icons to the library
