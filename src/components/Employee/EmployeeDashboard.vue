@@ -1,7 +1,11 @@
 <template>
-  <div>
+  <div style="margin-top: 69px">
     <h1>Employee Dashboard</h1>
     <hr />
+    <LoanRequest
+      v-if="currentFeature === 'loanRequests'"
+      @backToDashboard="goBack"
+    />
     <CardRequests
       v-if="currentFeature === 'cardRequests'"
       @backToDashboard="goBack"
@@ -81,8 +85,7 @@
 </template>
 
 <script>
-/* eslint-disable vue/no-unused-components */
-
+/* eslint-disable */
 import { AgGridVue } from "ag-grid-vue3"; // Import AgGridVue
 import "ag-grid-community/styles/ag-grid.css"; // Core Grid CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Quartz theme CSS
@@ -90,6 +93,7 @@ import AccountRequestDetails from "./AccountRequestDetails.vue";
 import CustomRenderComponent from "../CustomRenderComponent.vue";
 import CardRequests from "./CardsRequests.vue";
 import AccountManagement from "./AccountManagement.vue";
+import LoanRequest from "./LoanRequest.vue";
 
 export default {
   name: "EmployeeDashboard",
@@ -99,6 +103,7 @@ export default {
     CustomRenderComponent, // Register your custom cell renderer
     CardRequests,
     AccountManagement,
+    LoanRequest,
   },
   data() {
     return {
@@ -118,7 +123,13 @@ export default {
         { field: "email", headerName: "Email" },
         { field: "gender", headerName: "Gender" },
         { field: "phoneNumber", headerName: "Phone" },
-        { field: "isActive", headerName: "Status" },
+        {
+          field: "isActive",
+          headerName: "Status",
+          valueFormatter: (params) => {
+            return params.value.replace(/_/g, " ");
+          },
+        },
         {
           headerName: "Actions",
           cellRenderer: "CustomRenderComponent", // Correct usage of the cellRenderer
@@ -159,19 +170,35 @@ export default {
           },
         }
       );
-      // check for unauthorized access
+
+      // Check for unauthorized access (status 401)
       if (response.status === 401) {
         this.$store.dispatch("logout");
         alert("Session expired. Please login again.");
         this.$router.push("/login");
+        return; // Exit the function to prevent further processing
       }
-      const data = await response.json();
+
+      // Check if the response has content before attempting to parse as JSON
+      let data = [];
+      if (response.ok) {
+        try {
+          data = await response.json();
+        } catch (error) {
+          console.error("Error parsing JSON:", error);
+        }
+      }
+
       this.accountRequests = data;
       this.currentFeature = "accountRequests";
       this.featureSection = false;
     },
     viewCardRequests() {
       this.currentFeature = "cardRequests";
+      this.featureSection = false;
+    },
+    setLoanRequests() {
+      this.currentFeature = "loanRequests";
       this.featureSection = false;
     },
     openManageAccountModal() {

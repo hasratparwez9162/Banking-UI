@@ -1,6 +1,6 @@
 <template>
   <div
-    class="container-fluid d-flex justify-content-center align-items-center"
+    class="container-fluid d-flex justify-content-center align-items-center mt-5"
     style="height: 100vh"
   >
     <!-- Left side image -->
@@ -127,7 +127,7 @@ export default {
     togglePasswordVisibility() {
       this.showPassword = !this.showPassword;
     },
-    login() {
+    async login() {
       this.validateEmail();
       this.validatePassword();
 
@@ -150,62 +150,76 @@ export default {
         password: encryptedPassword,
       };
 
-      fetch("http://localhost:8080/apigateway/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginData),
-      })
-        .then((response) => {
-          if (!response.ok) {
-            return response.json().then((errorData) => {
-              throw new Error(JSON.stringify(errorData));
-            });
-          }
-          return response.json();
-        })
-        .then((data) => {
-          console.log("Login successful", data);
-          const isLogin = true;
-          const token = data.access_token;
-
-          // Decode JWT to check roles
-          const decodedToken = JSON.parse(atob(token.split(".")[1]));
-          const roles = decodedToken.realm_access.roles;
-          const isAdmin = roles.includes("admin");
-          const email = decodedToken.email;
-          localStorage.setItem("token", token);
-          localStorage.setItem("email", email);
-          this.$store.dispatch("setToken", token);
-          this.$store.dispatch("setEmail", email);
-          this.fetchUserData({ token, email });
-          this.$store.dispatch("setLogin", isLogin);
-          if (isAdmin) {
-            this.$router.push("/admindashboard");
-            this.$store.dispatch("setIsAdmin", isAdmin);
-            this.$store.dispatch("setIsLoading", false);
-          } else if (roles.includes("employee")) {
-            this.$store.dispatch("setIsEmployee", true);
-            this.$router.push("/employeedashboard");
-            this.$store.dispatch("setIsLoading", false);
-          } else {
-            this.$router.push("/dashboard");
-            this.$store.dispatch("setIsLoading", false);
-          }
-        })
-        .catch((error) => {
-          console.error("Error during login", error);
-          alert("Invalid credentials. Please try again.");
-          this.$store.dispatch("setIsLoading", false);
+      try {
+        this.$store.state.isLoading = true;
+        const response = await fetch("http://localhost:8080/apigateway/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(loginData),
         });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(JSON.stringify(errorData));
+        }
+
+        const data = await response.json();
+        console.log("Login successful", data);
+        const isLogin = true;
+        const token = data.access_token;
+
+        // Decode JWT to check roles
+        const decodedToken = JSON.parse(atob(token.split(".")[1]));
+        const roles = decodedToken.realm_access.roles;
+        const isAdmin = roles.includes("admin");
+        const email = decodedToken.email;
+
+        localStorage.setItem("token", token);
+        localStorage.setItem("email", email);
+        this.$store.dispatch("setToken", token);
+        this.$store.dispatch("setEmail", email);
+        this.$store.dispatch("setLogin", isLogin);
+
+        await this.fetchUserData({ token, email });
+        await this.fetchTransaction(token);
+        if (isAdmin) {
+          this.$router.push("/admindashboard");
+          this.$store.dispatch("setIsAdmin", true);
+        } else if (roles.includes("employee")) {
+          this.$store.dispatch("setIsEmployee", true);
+          this.$router.push("/employeedashboard");
+        } else {
+          this.$router.push("/dashboard-v1");
+        }
+
+        this.$store.state.isLoading = false;
+      } catch (error) {
+        console.error("Error during login", error);
+        alert("Invalid credentials. Please try again.");
+        this.$store.state.isLoading = false;
+      }
     },
+
     async fetchUserData({ token, email }) {
       this.$store.dispatch("setIsLoading", true);
       console.log("Fetching user data...");
       await this.$store.dispatch("fetchUserData", { token, email });
       console.log("User data fetched successfully");
       this.$store.dispatch("setIsLoading", false);
+    },
+    async fetchTransaction(token) {
+      const localaccount = localStorage.getItem("accounts");
+      if (localaccount) {
+        console.log("Fetct TX", token);
+        const accounts = JSON.parse(localaccount);
+        const accountNumber = accounts[0].accountNumber;
+        await this.$store.dispatch("fetchTransactions", {
+          token,
+          accountNumber,
+        });
+      }
     },
   },
 };

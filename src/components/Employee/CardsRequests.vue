@@ -50,7 +50,9 @@
 
             <p><strong>Expiry Date:</strong> {{ currentCard.expiryDate }}</p>
             <p><strong>User ID:</strong> {{ currentCard.userId }}</p>
-            <p><strong>Status:</strong> {{ currentCard.status }}</p>
+            <p>
+              <strong>Status:</strong> {{ formatStatus(currentCard.status) }}
+            </p>
           </div>
         </div>
 
@@ -60,27 +62,44 @@
             v-model="comment"
             placeholder="Add a comment for any notes"
             class="comment-input"
+            :disabled="currentCard.status == 'EXPIRED'"
           ></textarea>
         </div>
 
         <!-- Action buttons for card actions -->
         <div class="action-buttons">
           <button
-            :disabled="currentCard.status === 'ACTIVE'"
+            :disabled="
+              currentCard.status === 'ACTIVE' ||
+              currentCard.status == 'BLOCKED' ||
+              currentCard.status == 'EXPIRED' ||
+              currentCard.status == 'PENDING_BLOCK' ||
+              currentCard.status == 'PENDING_UNBLOCK'
+            "
             class="activate-button"
             @click="activateCard"
           >
             Activate
           </button>
           <button
-            :disabled="currentCard.status === 'BLOCKED'"
+            :disabled="
+              currentCard.status === 'BLOCKED' ||
+              currentCard.status == 'PENDING_ACTIVATION' ||
+              currentCard.status == 'EXPIRED' ||
+              currentCard.status == 'PENDING_UNBLOCK'
+            "
             class="block-button"
             @click="blockCard"
           >
             Block
           </button>
           <button
-            :disabled="!currentCard.status === 'ACTIVE'"
+            :disabled="
+              currentCard.status === 'ACTIVE' ||
+              currentCard.status == 'PENDING_ACTIVATION' ||
+              currentCard.status === 'EXPIRED' ||
+              currentCard.status == 'PENDING_BLOCK'
+            "
             class="unblock-button"
             @click="unblockCard"
           >
@@ -116,7 +135,13 @@ export default {
         { field: "creditLimit", headerName: "Credit Limit" },
         { field: "availableLimit", headerName: "Available Limit" },
         { field: "expiryDate", headerName: "Expiry Date" },
-        { field: "status", headerName: "Status" },
+        {
+          field: "status",
+          headerName: "Status",
+          valueFormatter: (params) => {
+            return params.value.replace(/_/g, " ");
+          },
+        },
         {
           headerName: "Actions",
           cellRenderer: "CustomRenderComponent", // Using the ActionButtons component
@@ -141,6 +166,7 @@ export default {
   },
   methods: {
     async fetchCardRequests() {
+      this.$store.state.isLoading = true;
       const token = this.$store.getters.token;
       const response = await fetch("http://localhost:8080/cards/non-active", {
         method: "GET",
@@ -156,6 +182,10 @@ export default {
       }
       const data = await response.json();
       this.cardRequests = data; // Set the fetched card requests
+      this.$store.state.isLoading = false;
+    },
+    formatStatus(status) {
+      return status.replace(/_/g, " ");
     },
 
     viewDetails(request) {
@@ -412,7 +442,8 @@ h1 {
 }
 
 .activate-button:disabled,
-.block-button:disabled {
+.block-button:disabled,
+.unblock-button:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }

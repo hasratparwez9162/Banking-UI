@@ -20,7 +20,11 @@ const store = createStore({
   mutations: {
     setUser(state, user) {
       console.log("Setting user:", user); // Debugging line
-      state.user = user;
+      state.user = {
+        ...state.user, // Keep existing fields
+        ...user, // Overwrite with updated fields
+      };
+      localStorage.setItem("user", JSON.stringify(state.user));
     },
     setCurrentUser(state, currentUser) {
       state.currentUser = currentUser;
@@ -51,9 +55,7 @@ const store = createStore({
     },
     addCard(state, card) {
       console.log("add card mutation");
-
       console.log(card);
-
       state.cards.push(card);
       console.log(state.cards);
       localStorage.setItem("cards", JSON.stringify(state.cards));
@@ -68,10 +70,18 @@ const store = createStore({
     setIsEmployee(state, setIsEmployee) {
       state.isEmployee = setIsEmployee;
     },
+    UPDATE_ACCOUNT_BALANCE(state, { newBalance }) {
+      if (state.accounts.length > 0) {
+        state.accounts[0].balance = newBalance;
+        console.log("UpdateBalance", newBalance);
+        localStorage.setItem("accounts", JSON.stringify(state.accounts));
+      }
+    },
   },
   actions: {
     async fetchUserData({ commit, dispatch }, { token, email }) {
       console.log("Fetching user data");
+      this.state.isLoading = true;
 
       try {
         const response = await fetch(`http://127.0.0.1:8080/users/${email}`, {
@@ -96,11 +106,21 @@ const store = createStore({
 
         const data = await response.json();
         commit("setUser", {
+          id: data.id,
           firstName: data.firstName,
           lastName: data.lastName,
           email: data.email,
           phoneNumber: data.phoneNumber,
           picturePath: data.picturePath,
+          address: data.address,
+          state: data.state,
+          city: data.city,
+          zip: data.zip,
+          gender: data.gender,
+          dateOfBirth: data.dateOfBirth,
+          alternatePhoneNumber: data.alternatePhoneNumber,
+          idProofPath: data.idProofPath,
+          isActive: data.isActive,
         });
 
         commit("setAccounts", data.accounts);
@@ -113,8 +133,10 @@ const store = createStore({
         localStorage.setItem("cards", JSON.stringify(data.cards));
         localStorage.setItem("token", token);
         localStorage.setItem("email", email);
+        this.state.isLoading = false;
       } catch (error) {
         console.error("Error fetching user data:", error);
+        this.state.isLoading = false;
       }
     },
 
@@ -123,7 +145,7 @@ const store = createStore({
 
       try {
         const response = await fetch(
-          `http://127.0.0.1:8080/account/transaction/${accountNumber}`,
+          `http://127.0.0.1:8080/account/api/v1/transactions/transaction/${accountNumber}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -149,6 +171,44 @@ const store = createStore({
         localStorage.setItem("transactions", JSON.stringify(data));
       } catch (error) {
         console.error("Error fetching transactions:", error);
+      }
+    },
+    async updateUserDetails({ commit }, updatedUser) {
+      const token = this.state.token;
+      const User = {
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        phoneNumber: updatedUser.phoneNumber,
+        city: updatedUser.city,
+        state: updatedUser.state,
+        zip: updatedUser.zip,
+      };
+      const id = updatedUser.id;
+      try {
+        // Making an API call using fetch
+        const response = await fetch(
+          `http://localhost:8080/users/update/${id}`,
+          {
+            method: "PUT", // HTTP method
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json", // Indicating JSON payload
+            },
+            body: JSON.stringify(User), // Sending the updated user data as a JSON string
+          }
+        );
+
+        // Check if the response is okay (status in the range 200–299)
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const data = await response.json(); // Parse the JSON response
+        commit("setUser", data); // Update the state
+        return data; // Return the data for further processing in `.then()`
+      } catch (error) {
+        console.error("Error updating user:", error);
+        throw error; // Re-throw the error to handle it in the component
       }
     },
 
@@ -252,6 +312,7 @@ const store = createStore({
 
     logout({ commit }) {
       // Clear Vuex state
+      console.log("Log out");
       commit("setUser", null);
       commit("setAccounts", []);
       commit("setLoans", []);

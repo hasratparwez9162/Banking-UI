@@ -17,10 +17,12 @@
         </p>
       </div>
       <div>
+        <!-- </div><p><strong>Account Type</strong> {{ details.accountType }}</p> -->
         <p><strong>Application No.:</strong> {{ details.applicationId }}</p>
         <p>
           <strong>Name:</strong> {{ details.firstName }} {{ details.lastName }}
         </p>
+
         <p><strong>Email:</strong> {{ details.email }}</p>
         <p><strong>Gender:</strong> {{ details.gender }}</p>
         <p><strong>Phone:</strong> {{ details.phoneNumber }}</p>
@@ -45,6 +47,7 @@
         v-model="comment"
         placeholder="Add a comment for approval or rejection"
         class="comment-input"
+        :disabled="isRejected"
       ></textarea>
     </div>
 

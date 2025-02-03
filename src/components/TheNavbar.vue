@@ -1,5 +1,8 @@
 <template>
-  <div class="navbar-area navbar navbar-expand-lg navbar-light bg-light">
+  <div
+    class="navbar-area navbar navbar-expand-lg navbar-light bg-light shadow"
+    style="position: fixed; top: 0; z-index: 9; width: 100%"
+  >
     <div
       class="container-fluid px-5 d-flex align-items-center justify-content-between"
     >
@@ -9,12 +12,12 @@
           src="@/assets/logo.png"
           alt="logo"
           class="img-fluid"
-          style="max-width: 120px"
+          style="max-width: 100px"
         />
       </a>
 
       <!-- Hamburger icon for mobile view -->
-      <button
+      <!-- <button
         class="navbar-toggler"
         type="button"
         @click="toggleNav"
@@ -22,10 +25,11 @@
         aria-label="Toggle navigation"
       >
         <span class="navbar-toggler-icon bgcolor"></span>
-      </button>
+      </button> -->
 
       <!-- Center navigation items -->
       <div
+        v-if="!isLogin"
         class="collapse navbar-collapse flex-grow-1 text-center"
         :class="{ show: isNavOpen }"
         id="navbarNav"
@@ -72,13 +76,19 @@
             class="dropdown-menu dropdown-menu-end"
             aria-labelledby="userDropdown"
           >
-            <li><a class="dropdown-item" href="/profile">Profile</a></li>
+            <li>
+              <a class="dropdown-item" href="/profile"
+                ><i class="bi bi-person-fill me-1"></i>Profile</a
+              >
+            </li>
 
             <li>
               <hr class="dropdown-divider" />
             </li>
             <li>
-              <a class="dropdown-item" @click="logout" href="#">Logout</a>
+              <a class="dropdown-item" @click="logout" href="#"
+                ><i class="bi bi-box-arrow-left me-1"></i>Logout</a
+              >
             </li>
           </ul>
         </div>
@@ -105,10 +115,10 @@ export default {
   },
   methods: {
     logout() {
-      this.$store.dispatch("setIsLoading", true);
+      this.$store.state.isLoading = true;
       this.$router.push("/login").then(() => {
         this.$store.dispatch("logout");
-        this.$store.dispatch("setIsLoading", false);
+        this.$store.state.isLoading = false;
       });
     },
     toggleNav() {
@@ -143,5 +153,8 @@ export default {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   border-radius: 8px;
   padding: 10px;
+}
+.navbar-brand {
+  margin-left: 1rem;
 }
 </style>

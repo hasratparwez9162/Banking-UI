@@ -1,6 +1,6 @@
 <template>
   <div v-if="!isLoading">
-    <div class="mx-3 mt-4">
+    <div class="mx-3 mt-5 pt-5">
       <!-- Account Balance Section -->
       <div class="card mt-3">
         <div class="card-body">
@@ -223,7 +223,9 @@
                 <td>{{ card.creditLimit }}</td>
                 <td>{{ card.availableLimit }}</td>
                 <td>{{ card.expiryDate }}</td>
-                <td :class="statusClass(card.status)">{{ card.status }}</td>
+                <td :class="statusClass(card.status)">
+                  {{ formatStatus(card.status) }}
+                </td>
                 <td class="actions">
                   <button
                     @click="blockCard(card.id)"
@@ -300,7 +302,7 @@
               <tr>
                 <th>Loan Number</th>
                 <th>Loan Type</th>
-                <th>Amount (₹)</th>
+                <th>Principle Amount (₹)</th>
                 <th>Outstanding Balance (₹)</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -312,8 +314,10 @@
                 <td>{{ loan.loanType }}</td>
                 <td>₹{{ loan.loanAmount }}</td>
                 <td>₹{{ loan.remainingBalance }}</td>
-                <td :class="statusClass(loan.status)">{{ loan.loanStatus }}</td>
-                <td class="actions">
+                <td :class="statusClass(loan.loanStatus)">
+                  {{ formatStatus(loan.status) }}
+                </td>
+                <td class="actions" v-if="loan.status == 'APPROVED'">
                   <button @click="payLoan(loan.loanNumber)" class="pay-button">
                     Pay
                   </button>
@@ -331,50 +335,16 @@
           @close="closeLoanDialog"
         ></loan-details-dialog>
 
-        <button class="apply-button" @click="openApplyLoanDialog">
+        <button class="apply-button" @click="openApplyLoanPage">
           Apply for a New Loan
         </button>
       </div>
       <div v-else>
         <div class="no-data">
           <p>You currently have no loans.</p>
-          <button class="apply-button" @click="openApplyLoanDialog">
+          <button class="apply-button" @click="openApplyLoanPage">
             Apply for a Loan
           </button>
-        </div>
-      </div>
-    </div>
-    <!-- Apply Loan Dialog -->
-    <div v-if="showApplyLoanDialog" class="dialog-container">
-      <div class="dialog-card">
-        <div class="dialog-header">Apply for a Loan</div>
-        <div class="dialog-body">
-          <form @submit.prevent="applyLoan">
-            <div class="form-group">
-              <label for="loanType">Loan Type</label>
-              <select v-model="loanForm.type" id="loanType" required>
-                <option value="personal">Personal Loan</option>
-                <option value="home">Home Loan</option>
-                <option value="car">Car Loan</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="loanAmount">Loan Amount (₹)</label>
-              <input
-                type="number"
-                id="loanAmount"
-                v-model="loanForm.amount"
-                min="1"
-                required
-              />
-            </div>
-          </form>
-        </div>
-        <div class="dialog-footer">
-          <button @click="submitLoanApplication" class="btn-submit">
-            Apply
-          </button>
-          <button @click="closeLoanDialog" class="btn-cancel">Cancel</button>
         </div>
       </div>
     </div>
@@ -457,14 +427,17 @@ export default {
     changeTab(tab) {
       this.activeTab = tab;
       const token = this.$store.getters.token; // Get token from Vuex store
-      // const user = JSON.parse(localStorage.getItem("user"));
-      // const email = user.email;
+      const user = JSON.parse(localStorage.getItem("user"));
+      const email = user.email;
 
       if (tab === "transactions" && this.user && this.accounts.length > 0) {
         const accountNumber = this.accounts[0].accountNumber;
         this.fetchTransactions({ token, accountNumber });
-        // this.fetchUserData({ token, email });
+        this.fetchUserData({ token, email });
       }
+    },
+    formatStatus(status) {
+      return status.replace(/_/g, " ");
     },
 
     formatTimestamp(timestamp) {
@@ -485,6 +458,7 @@ export default {
       return status;
     },
     async blockCard(id) {
+      this.$store.state.isLoading = true;
       const token = this.$store.getters.token;
       const user = JSON.parse(localStorage.getItem("user"));
       const email = user.email;
@@ -504,9 +478,11 @@ export default {
       const responceData = await response.json();
       console.log(responceData);
       this.fetchUserData({ token, email });
+      this.$store.state.isLoading = false;
       alert("Card blocked Request sent successfully.");
     },
     async unblockCard(id) {
+      this.$store.state.isLoading = true;
       console.log(id);
       const token = this.$store.getters.token;
       const user = JSON.parse(localStorage.getItem("user"));
@@ -527,9 +503,11 @@ export default {
       const responceData = await response.json();
       console.log(responceData);
       this.fetchUserData({ token, email });
+      this.$store.state.isLoading = false;
       alert("Card unblocked Request sent successfully.");
     },
     async submitAddMoney() {
+      this.$store.state.isLoading = true;
       const token = this.$store.getters.token;
       const AddMoneyRequest = {
         accountNumber: this.AddMoneyForm.account,
@@ -558,13 +536,16 @@ export default {
         const user = JSON.parse(localStorage.getItem("user"));
         const userId = user.id;
         this.fetchAccounts({ token, userId });
+        this.$store.state.isLoading = false;
         this.showAddMoneyDialog = false;
       } catch (error) {
+        this.$store.state.isLoading = false;
         console.log(error);
         alert("Facing some internal issue try after sometime ..");
       }
     },
     async submitWithdraw() {
+      this.$store.state.isLoading = true;
       const token = this.$store.getters.token;
 
       // Prepare the transaction request body
@@ -595,6 +576,7 @@ export default {
 
         const data = await response.text();
         console.log("Transaction successful:", data);
+        this.$store.state.isLoading = false;
         alert("Successfully transferred money!");
 
         // Fetch updated account data after the transaction
@@ -607,11 +589,13 @@ export default {
         // Optionally, close the dialog and reset the form
         this.closeWithdrawDialog();
       } catch (error) {
+        this.$store.state.isLoading = false;
         console.error("Error during transaction:", error);
         alert(error.message); // Show the error in an alert
       }
     },
     async cardIssue() {
+      this.$store.state.isLoading = true;
       const token = this.$store.getters.token;
       const user = JSON.parse(localStorage.getItem("user"));
       const email = user.email;
@@ -638,12 +622,18 @@ export default {
         //const card = await response.json();
 
         this.fetchUserData({ token, email });
+        this.$store.state.isLoading = false;
         alert("Successfully issue the card !!");
         this.showApplyCardDialog = false;
       } catch (error) {
         console.error("Error during transaction:", error);
         alert(error.message);
       }
+    },
+    openApplyLoanPage() {
+      this.$router.push({
+        name: "ApplyLoan",
+      });
     },
     onWithdraw() {
       this.withdrawForm.fromAccount = this.accounts[0].accountNumber;
@@ -918,6 +908,18 @@ export default {
   color: #28a745 !important;
   font-weight: bold;
 }
+.APPROVED {
+  color: #28a745 !important;
+  font-weight: bold;
+}
+.PENDING {
+  color: #ffe70c !important;
+  font-weight: bold;
+}
+.PENDING_BLOCK {
+  color: #ffe600 !important;
+  font-weight: bold;
+}
 
 .BLOCKED {
   color: #dc3545 !important;
@@ -930,6 +932,9 @@ export default {
 }
 
 .ACTIVE::before {
+  content: "✔️ ";
+}
+.APPROVED::before {
   content: "✔️ ";
 }
 

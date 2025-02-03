@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="mt-5">
     <div class="header d-flex align-items-center bg-primary text-white">
       <div class="container-fluid">
         <div class="row">

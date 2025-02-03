@@ -14,8 +14,27 @@ import "bootstrap"; // Optional: if you need Bootstrap's JavaScript components
 // Add FontAwesome icons to the library
 library.add(fas);
 
-createApp(App)
-  .component("font-awesome-icon", FontAwesomeIcon)
-  .use(router)
-  .use(store)
-  .mount("#app");
+// FormKit imports
+import { plugin as formKitPlugin, defaultConfig } from "@formkit/vue";
+import { createMultiStepPlugin } from "@formkit/addons";
+import "@formkit/themes/genesis"; // FormKit theme
+import "@formkit/addons/css/multistep"; // Multi-step CSS
+
+// Create and configure the Vue app
+const app = createApp(App);
+
+// Register FontAwesome component
+app.component("font-awesome-icon", FontAwesomeIcon);
+
+// Use router, store, and FormKit plugins
+app.use(router);
+app.use(store);
+app.use(
+  formKitPlugin,
+  defaultConfig({
+    plugins: [createMultiStepPlugin()],
+  })
+);
+
+// Mount the app
+app.mount("#app");

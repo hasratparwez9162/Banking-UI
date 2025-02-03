@@ -199,7 +199,7 @@ export default {
       const patterns = {
         username: /^[A-Za-z0-9_]{3,15}$/,
         firstname: /^[A-Za-z]{2,30}$/,
-        lastname: /^[A-Za-z]{2,30}$/,
+        lastname: /^[A-Za-z]{1,30}$/,
         email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
         password: {
           length: /.{6,}/,

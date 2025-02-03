@@ -127,12 +127,11 @@ export default {
 .about-us {
   font-family: Arial, sans-serif;
   line-height: 1.6;
+  margin-top: 69px;
 }
 
 .card {
   margin: 20px 0;
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-  /* border-radius: 8px; */
   background-color: #fff;
   padding: 20px;
   border: none;

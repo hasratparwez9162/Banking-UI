@@ -1,6 +1,5 @@
 <template>
-  <TheSppiner :is-loading="isLoading" :size="size" />
-  <div class="container mt-4">
+  <div class="responsive-container p-5 card" style="margin-top: 69px">
     <h2 class="text-center">Open Account</h2>
     <p class="text-center">
       Please enter your details, and we will send a mail after successfully
@@ -9,7 +8,7 @@
     <form @submit.prevent="submitForm">
       <!-- Row 1: First Name and Last Name -->
       <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="firstName">First Name*</label>
           <input
             :class="['form-control', errors.firstNameClass]"
@@ -20,7 +19,7 @@
           />
           <span class="text-danger">{{ errors.firstName || "" }}</span>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="lastName">Last Name*</label>
           <input
             :class="['form-control', errors.lastNameClass]"
@@ -35,7 +34,7 @@
 
       <!-- Row 2: Email and Gender -->
       <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="email">Email*</label>
           <input
             :class="['form-control', errors.emailClass]"
@@ -45,7 +44,7 @@
           />
           <span class="text-danger">{{ errors.email || "" }}</span>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="gender">Gender*</label>
           <select
             id="gender"
@@ -63,7 +62,7 @@
 
       <!-- Row 3: Phone Numbers -->
       <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="phoneNumber">Phone Number*</label>
           <div class="input-group">
             <div class="input-group-text">+91</div>
@@ -76,7 +75,7 @@
           </div>
           <span class="text-danger">{{ errors.phoneNumber || "" }}</span>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="alternatePhoneNumber">Alternate Phone Number</label>
           <div class="input-group">
             <div class="input-group-text">+91</div>
@@ -107,7 +106,7 @@
 
       <!-- Row 5: State and City -->
       <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="state">State*</label>
           <select
             :class="['form-select', errors.stateClass]"
@@ -126,7 +125,7 @@
           </select>
           <span class="text-danger">{{ errors.selectedState || "" }}</span>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="city">City*</label>
           <select
             :class="['form-select', errors.cityClass]"
@@ -144,8 +143,8 @@
 
       <!-- Row 6: Zip and Account Type -->
       <div class="row">
-        <div class="col-md-6 mb-3">
-          <label for="zip">Zip*</label>
+        <div class="col-sm-12 col-md-6 mb-3">
+          <label for="zip">Pin Code*</label>
           <input
             :class="['form-control', errors.zipClass]"
             type="text"
@@ -154,7 +153,7 @@
           />
           <span class="text-danger">{{ errors.zip || "" }}</span>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="accountType">Account Type*</label>
           <select
             :class="['form-select', errors.accountTypeClass]"
@@ -171,7 +170,7 @@
 
       <!-- Row 7: File Uploads -->
       <div class="row">
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="image">Upload Profile Picture*</label>
           <input
             type="file"
@@ -181,7 +180,7 @@
           />
           <span class="text-danger">{{ errors.image || "" }}</span>
         </div>
-        <div class="col-md-6 mb-3">
+        <div class="col-sm-12 col-md-6 mb-3">
           <label for="idProof">Upload ID Proof*</label>
           <input
             type="file"
@@ -225,12 +224,11 @@
 
 <script>
 import SuccessDialog from "./SuccessDialog.vue";
-import TheSppiner from "./TheSppiner.vue";
+
 import AWS from "aws-sdk";
 export default {
   components: {
     SuccessDialog,
-    TheSppiner,
   },
   data() {
     return {
@@ -345,9 +343,9 @@ export default {
       if (!value) {
         this.errors.lastNameClass = "form-select-invalid";
         this.errors.lastName = "Last name is required.";
-      } else if (value.length < 2 || value.length > 30) {
+      } else if (value.length < 1 || value.length > 30) {
         this.errors.lastNameClass = "form-select-invalid";
-        this.errors.lastName = "Last name must be between 2 and 30 characters.";
+        this.errors.lastName = "Last name must be between 1 and 30 characters.";
         this.formData.lastName = value.slice(0, 30);
       } else if (!namePattern.test(value)) {
         this.errors.lastNameClass = "form-select-invalid";
@@ -697,6 +695,7 @@ export default {
     },
     async fetchCities() {
       console.log("Fetching cities...");
+      this.$store.state.isLoading = true;
       try {
         if (!this.formData.selectedState) return;
 
@@ -715,6 +714,7 @@ export default {
         );
         const data = await response.json();
         this.cities = data.data; // Set the cities in dropdown
+        this.$store.state.isLoading = false;
       } catch (error) {
         console.error("Error fetching cities:", error);
       }
@@ -752,19 +752,32 @@ export default {
   display: block !important;
   margin-top: 5px !important;
 }
-.container {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 40%;
-  margin: auto;
-  margin-top: 67px !important;
-}
 label {
   text-align: left;
   display: block; /* Ensures labels take full width */
 }
+
+.responsive-container {
+  width: 100%;
+}
+
+/* Desktop view (large devices) */
+@media (min-width: 992px) {
+  .responsive-container {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+}
+
+/* Tablet and Mobile view (medium and small devices) */
+@media (max-width: 991.98px) {
+  .responsive-container {
+    max-width: 100%;
+    margin: 0;
+    padding: 2rem !important;
+  }
+}
+
 /*
 h2 {
   text-align: center;

@@ -16,6 +16,8 @@ import EmployeeDashboard from "@/components/Employee/EmployeeDashboard.vue";
 import UnderDevelopment from "@/components/UnderDevelopment.vue";
 import AccountManagement from "@/components/Employee/AccountManagement.vue";
 import ProfileInfo from "@/components/ProfileInfo.vue";
+import ApplyLoan from "@/components/ApplyLoan.vue";
+
 const routes = [
   {
     path: "/",
@@ -33,7 +35,7 @@ const routes = [
     path: "/dashboard",
     name: "MainDashboard",
     component: MainDashboard,
-    meta: { title: "User Dashboard - Aditi Banking" },
+    meta: { title: "User Dashboard - Aditi Banking", requiresAuth: true },
   },
   {
     path: "/account",
@@ -54,16 +56,23 @@ const routes = [
     meta: { title: "Loans - Aditi Banking" },
   },
   {
+    path: "/loan-apply",
+    name: "ApplyLoan",
+    component: ApplyLoan,
+    props: (route) => ({ user: route.params.user }),
+    meta: { title: "Apply Loan - Aditi Banking", requiresAuth: true },
+  },
+  {
     path: "/about",
     name: "AboutUs",
     component: AboutUs,
     meta: { title: "About Us - Aditi Banking" },
   },
   {
-    path: "/test",
+    path: "/dashboard-v1",
     name: "TheTest",
     component: TheTest,
-    meta: { title: "Test Page - Aditi Banking" },
+    meta: { title: "Dashboard Page - Aditi Banking" },
   },
   {
     path: "/login",
@@ -87,14 +96,14 @@ const routes = [
     path: "/profile",
     name: "Profile",
     component: ProfileInfo,
-    meta: { title: "Profile - Aditi Banking" },
+    meta: { title: "Profile - Aditi Banking", requiresAuth: true },
   },
 
   {
     path: "/admindashboard",
     name: "AdminDashboard",
     component: AdminDashboard,
-    meta: { title: "Admin Dashboard - Aditi Banking" },
+    meta: { title: "Admin Dashboard - Aditi Banking", requiresAuth: true },
   },
   {
     path: "/track-application",
@@ -106,7 +115,7 @@ const routes = [
     path: "/employeedashboard",
     name: "EmployeeDashboard",
     component: EmployeeDashboard,
-    meta: { title: "Employee Dashboard - Aditi Banking" },
+    meta: { title: "Employee Dashboard - Aditi Banking", requiresAuth: true },
   },
   {
     path: "/underdevelopment",
@@ -118,7 +127,7 @@ const routes = [
     path: "/ac-management",
     name: "Account Management",
     component: AccountManagement,
-    meta: { title: "Account Management - Aditi Banking" },
+    meta: { title: "Account Management - Aditi Banking", requiresAuth: true },
   },
 ];
 
@@ -128,9 +137,15 @@ const router = createRouter({
 });
 router.beforeEach((to, from, next) => {
   if (to.meta.title) {
-    document.title = to.meta.title; // Update the tab title
+    document.title = to.meta.title;
   }
-  next();
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth);
+  const token = localStorage.getItem("token");
+  if (requiresAuth && !token) {
+    next({ name: "TheLogin" });
+  } else {
+    next();
+  }
 });
 
 export default router;

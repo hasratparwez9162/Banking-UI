@@ -7,12 +7,12 @@
           <div class="loan-info">
             <div><strong>Loan Number:</strong> {{ loan.loanNumber }}</div>
             <div><strong>Principal Amount:</strong> ₹{{ loan.loanAmount }}</div>
-            <div><strong>Status:</strong> {{ loan.loanStatus }}</div>
+            <div><strong>Status:</strong> {{ loan.status }}</div>
           </div>
           <div class="loan-info">
             <div><strong>Loan Type:</strong> {{ loan.loanType }}</div>
             <div><strong>Interest Rate:</strong> {{ loan.interestRate }}%</div>
-            <div><strong>Tenure:</strong> {{ loan.tenureMonths }} months</div>
+            <div><strong>Tenure:</strong> {{ loan.months }} months</div>
           </div>
           <div class="loan-info">
             <div>
@@ -63,9 +63,8 @@ export default {
       emiBreakdown: [], // EMI breakdown to be calculated
       columnDefs: [
         // Column definitions for ag-Grid
-        { headerName: "Month", valueGetter: "node.rowIndex + 1" }, // Automatically generate month numbers
-        { headerName: "EMI Amount", field: "amount" },
-        { headerName: "Status", field: "status" },
+        { headerName: "Due Date", field: "dueDate", width: 265 }, // Automatically generate month numbers
+        { headerName: "EMI Amount", field: "amount", width: 265 },
       ],
       defaultColDef: {
         sortable: true,
@@ -88,25 +87,25 @@ export default {
     },
     calculateEMIBreakdown() {
       const principal = this.loan.loanAmount;
-      const remainingBalance = this.loan.remainingBalance;
       const rate = this.loan.interestRate / 12 / 100; // Monthly interest rate
-      const tenure = this.loan.tenureMonths;
+      const tenure = this.loan.months;
+      const endDate = new Date(this.loan.endDate); // Parse the end date
 
       // EMI Calculation formula
       const emiAmount =
         (principal * rate * Math.pow(1 + rate, tenure)) /
         (Math.pow(1 + rate, tenure) - 1);
 
-      const totalPaid = principal - remainingBalance;
-      const paidEMIs = Math.floor(totalPaid / emiAmount);
-
       this.emiBreakdown = [];
 
-      // Generate EMI breakdown with paid/unpaid status
-      for (let i = 1; i <= tenure; i++) {
-        this.emiBreakdown.push({
+      // Generate EMI breakdown with due dates based on the end date
+      for (let i = tenure; i >= 1; i--) {
+        const dueDate = new Date(endDate);
+        dueDate.setMonth(dueDate.getMonth() - (tenure - i)); // Calculate due date backward from the end date
+
+        this.emiBreakdown.unshift({
           amount: emiAmount.toFixed(2), // Format to two decimal places
-          status: i <= paidEMIs ? "Paid" : "Unpaid",
+          dueDate: dueDate.toISOString().split("T")[0], // Format date as YYYY-MM-DD
         });
       }
     },

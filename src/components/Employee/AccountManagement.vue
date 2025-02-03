@@ -108,7 +108,7 @@
     </section>
 
     <!-- Manage Cards -->
-    <section v-if="cards.length" class="p-3">
+    <!-- <section v-if="cards.length" class="p-3">
       <h2 class="h5 text-start">Manage Cards</h2>
       <ul class="list-group">
         <li v-for="card in cards" :key="card.cardId" class="list-group-item">
@@ -130,7 +130,7 @@
           </div>
         </li>
       </ul>
-    </section>
+    </section> -->
     <div v-if="showAddMoneyDialog" class="dialog-container">
       <div class="dialog-card">
         <div class="dialog-header">Add Money</div>

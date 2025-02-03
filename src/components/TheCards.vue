@@ -43,7 +43,7 @@
           </p>
           <p>20% Instant Discount** on Food &amp; Beverages</p>
           <p>5% Instant Discount** on movie tickets</p>
-          <a class="apply-btn" @click="apply"> Apply </a>
+          <!-- <a class="apply-btn" @click="apply"> Apply </a> -->
         </div>
       </div>
     </div>
@@ -64,7 +64,7 @@
           <p>
             Eligible for Priority Pass to get access to 900+ VIP airport lounges
           </p>
-          <a class="apply-btn" @click="apply"> Apply </a>
+          <!-- <a class="apply-btn" @click="apply"> Apply </a> -->
         </div>
       </div>
     </div>
@@ -83,7 +83,7 @@
           <p>Earn 3 Reward Points* per ₹100 spent</p>
           <p>Enjoy facility of UPI Payment on Credit Card</p>
           <p>Virtual Lifetime Free Credit Card</p>
-          <a class="apply-btn" @click="apply"> Apply </a>
+          <!-- <a class="apply-btn" @click="apply"> Apply </a> -->
         </div>
       </div>
     </div>

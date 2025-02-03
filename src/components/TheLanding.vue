@@ -52,8 +52,7 @@ export default {
   z-index: 1;
   overflow: hidden;
   min-height: 60vh;
-  height: 83vh;
-  margin-top: 56px;
+  height: 90vh;
 }
 
 .main-banner-woman-content {

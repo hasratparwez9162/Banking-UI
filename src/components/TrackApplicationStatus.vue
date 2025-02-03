@@ -68,38 +68,36 @@ export default {
   },
   methods: {
     async submit() {
-      console.log("Form submitted: " + this.applicationId);
+      console.log("Submitting application ID:", this.applicationId);
       try {
         const response = await fetch(
           `http://localhost:8080/users/application/${this.applicationId}`,
           {
             method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json" },
           }
         );
+        console.log("Response status:", response.status);
         if (response.status === 404) {
           this.status = "notFound";
-        } else if (!response.ok) {
+          return;
+        }
+        if (!response.ok) {
           const errorData = await response.text();
-          console.log("Error fetching application status:", errorData);
+          console.error("Error fetching status:", errorData);
           throw new Error(errorData);
         }
         const data = await response.json();
-        console.log("Application status data:", data);
-        if (data.isActive === "INACTIVE") {
-          this.status = "pending";
-        } else if (data.isActive === "ACTIVE") {
-          this.status = "accept";
-        } else if (data.isActive === "REJECTED") {
-          this.status = "reject";
-        }
-        this.comment = data.comments;
-
-        console.log("Application status:", this.status);
+        console.log("API response data:", data);
+        this.status =
+          data.isUserActives === "INACTIVE"
+            ? "pending"
+            : data.isUserActives === "ACTIVE"
+            ? "accept"
+            : "reject";
+        this.comment = data.comments || "No comments.";
       } catch (error) {
-        console.error("Error fetching application status:", error);
+        console.error("Error during fetch:", error.message);
       }
     },
   },
